@@ -1,0 +1,14 @@
+[
+  {
+    "_id": "1",
+    "name": "Volume Brasileiro",
+    "description": "Realce sua beleza",
+    "price": 175,
+    "category": "serviço",
+    "duration": 90,
+    "image": "/images/product-1759187744586-133604920.png",
+    "isActive": true,
+    "createdAt": "2025-09-29T23:15:46.333Z",
+    "updatedAt": "2025-09-29T23:15:46.333Z"
+  }
+]
