@@ -7,6 +7,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('appointments');
   const [appointments, setAppointments] = useState([]);
   const [products, setProducts] = useState([]);
+  const [financialMetrics, setFinancialMetrics] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -15,6 +16,7 @@ const AdminDashboard = () => {
     name: '',
     description: '',
     price: '',
+    materialCost: '',
     category: 'serviço',
     duration: '',
     image: ''
@@ -25,6 +27,8 @@ const AdminDashboard = () => {
       fetchAppointments();
     } else if (activeTab === 'products') {
       fetchProducts();
+    } else if (activeTab === 'financial') {
+      fetchFinancialMetrics();
     }
   }, [activeTab]);
 
@@ -49,6 +53,19 @@ const AdminDashboard = () => {
     } catch (error) {
       toast.error('Erro ao carregar produtos');
       console.error('Erro ao buscar produtos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchFinancialMetrics = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('/api/financial/metrics');
+      setFinancialMetrics(response.data);
+    } catch (error) {
+      toast.error('Erro ao carregar métricas financeiras');
+      console.error('Erro ao buscar métricas:', error);
     } finally {
       setLoading(false);
     }
@@ -79,6 +96,7 @@ const AdminDashboard = () => {
         name: '',
         description: '',
         price: '',
+        materialCost: '',
         category: 'serviço',
         duration: '',
         image: ''
@@ -98,6 +116,7 @@ const AdminDashboard = () => {
       name: product.name,
       description: product.description,
       price: product.price.toString(),
+      materialCost: product.materialCost ? product.materialCost.toString() : '',
       category: product.category,
       duration: product.duration ? product.duration.toString() : '',
       image: product.image || ''
@@ -214,6 +233,21 @@ const AdminDashboard = () => {
               }}
             >
               🛍️ Produtos/Serviços
+            </button>
+            <button
+              onClick={() => setActiveTab('financial')}
+              style={{
+                padding: '1rem 2rem',
+                border: 'none',
+                background: 'none',
+                borderBottom: activeTab === 'financial' ? '3px solid #ec4899' : '3px solid transparent',
+                color: activeTab === 'financial' ? '#ec4899' : '#6b7280',
+                fontWeight: activeTab === 'financial' ? '600' : '400',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              💰 Financeiro
             </button>
           </div>
 
@@ -362,6 +396,7 @@ const AdminDashboard = () => {
                       name: '',
                       description: '',
                       price: '',
+                      materialCost: '',
                       category: 'serviço',
                       duration: '',
                       image: ''
@@ -437,21 +472,34 @@ const AdminDashboard = () => {
                         />
                       </div>
 
-                      {productForm.category === 'serviço' && (
-                        <div className="form-group">
-                          <label className="form-label">Duração (minutos) *</label>
-                          <input
-                            type="number"
-                            min="15"
-                            step="15"
-                            className="form-input"
-                            value={productForm.duration}
-                            onChange={(e) => setProductForm(prev => ({ ...prev, duration: e.target.value }))}
-                            required
-                          />
-                        </div>
-                      )}
+                      <div className="form-group">
+                        <label className="form-label">Custo de Material (R$)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          className="form-input"
+                          value={productForm.materialCost}
+                          onChange={(e) => setProductForm(prev => ({ ...prev, materialCost: e.target.value }))}
+                          placeholder="0.00"
+                        />
+                      </div>
                     </div>
+
+                    {productForm.category === 'serviço' && (
+                      <div className="form-group">
+                        <label className="form-label">Duração (minutos) *</label>
+                        <input
+                          type="number"
+                          min="15"
+                          step="15"
+                          className="form-input"
+                          value={productForm.duration}
+                          onChange={(e) => setProductForm(prev => ({ ...prev, duration: e.target.value }))}
+                          required
+                        />
+                      </div>
+                    )}
 
                     <ImageUpload
                       onImageUpload={(imageUrl) => setProductForm(prev => ({ ...prev, image: imageUrl }))}
@@ -616,6 +664,152 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Seção Financeira */}
+          {activeTab === 'financial' && (
+            <div>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '2rem'
+              }}>
+                <h2 style={{
+                  fontSize: '1.5rem',
+                  fontWeight: '600',
+                  color: '#4a4a4a'
+                }}>
+                  💰 Métricas Financeiras
+                </h2>
+                <button
+                  onClick={fetchFinancialMetrics}
+                  className="btn btn-secondary"
+                  disabled={loading}
+                >
+                  {loading ? 'Carregando...' : 'Atualizar'}
+                </button>
+              </div>
+
+              {loading ? (
+                <div className="flex-center" style={{ padding: '3rem' }}>
+                  <div className="loading"></div>
+                </div>
+              ) : financialMetrics ? (
+                <div>
+                  {/* Cards de Métricas */}
+                  <div className="grid grid-3" style={{ gap: '1.5rem', marginBottom: '2rem' }}>
+                    <div className="card" style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>💰</div>
+                      <h3 style={{ fontSize: '1.2rem', fontWeight: '600', color: '#4a4a4a', marginBottom: '0.5rem' }}>
+                        Faturamento Bruto
+                      </h3>
+                      <p style={{ fontSize: '1.5rem', fontWeight: '700', color: '#10b981' }}>
+                        {formatPrice(financialMetrics.grossRevenue)}
+                      </p>
+                      <p style={{ fontSize: '0.9rem', color: '#6b7280' }}>
+                        Agendamentos confirmados + concluídos
+                      </p>
+                    </div>
+
+                    <div className="card" style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>💵</div>
+                      <h3 style={{ fontSize: '1.2rem', fontWeight: '600', color: '#4a4a4a', marginBottom: '0.5rem' }}>
+                        Faturamento Líquido
+                      </h3>
+                      <p style={{ fontSize: '1.5rem', fontWeight: '700', color: '#3b82f6' }}>
+                        {formatPrice(financialMetrics.netRevenue)}
+                      </p>
+                      <p style={{ fontSize: '0.9rem', color: '#6b7280' }}>
+                        Agendamentos concluídos - custos
+                      </p>
+                    </div>
+
+                    <div className="card" style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📦</div>
+                      <h3 style={{ fontSize: '1.2rem', fontWeight: '600', color: '#4a4a4a', marginBottom: '0.5rem' }}>
+                        Custo de Materiais
+                      </h3>
+                      <p style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f59e0b' }}>
+                        {formatPrice(financialMetrics.materialCost)}
+                      </p>
+                      <p style={{ fontSize: '0.9rem', color: '#6b7280' }}>
+                        Total gasto em materiais
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Estatísticas de Agendamentos */}
+                  <div className="card" style={{ marginBottom: '2rem' }}>
+                    <h3 style={{ fontSize: '1.3rem', fontWeight: '600', color: '#4a4a4a', marginBottom: '1.5rem' }}>
+                      📊 Estatísticas de Agendamentos
+                    </h3>
+                    <div className="grid grid-4" style={{ gap: '1rem' }}>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '2rem', fontWeight: '700', color: '#6b7280' }}>
+                          {financialMetrics.totalAppointments}
+                        </div>
+                        <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>Total</div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '2rem', fontWeight: '700', color: '#f59e0b' }}>
+                          {financialMetrics.pendingAppointments}
+                        </div>
+                        <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>Pendentes</div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '2rem', fontWeight: '700', color: '#10b981' }}>
+                          {financialMetrics.confirmedAppointments}
+                        </div>
+                        <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>Confirmados</div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '2rem', fontWeight: '700', color: '#3b82f6' }}>
+                          {financialMetrics.completedAppointments}
+                        </div>
+                        <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>Concluídos</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Margem de Lucro */}
+                  <div className="card">
+                    <h3 style={{ fontSize: '1.3rem', fontWeight: '600', color: '#4a4a4a', marginBottom: '1rem' }}>
+                      📈 Margem de Lucro
+                    </h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <div style={{ fontSize: '2rem', fontWeight: '700', color: '#10b981' }}>
+                        {financialMetrics.profitMargin}%
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{
+                          background: '#e5e7eb',
+                          height: '10px',
+                          borderRadius: '5px',
+                          overflow: 'hidden'
+                        }}>
+                          <div style={{
+                            background: '#10b981',
+                            height: '100%',
+                            width: `${Math.min(financialMetrics.profitMargin, 100)}%`,
+                            transition: 'width 0.3s ease'
+                          }}></div>
+                        </div>
+                      </div>
+                    </div>
+                    <p style={{ fontSize: '0.9rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                      Percentual de lucro sobre o faturamento bruto
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center" style={{ padding: '3rem' }}>
+                  <p style={{ color: '#6b7280', fontSize: '1.1rem' }}>
+                    Erro ao carregar métricas financeiras.
+                  </p>
                 </div>
               )}
             </div>

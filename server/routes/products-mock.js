@@ -79,6 +79,7 @@ router.post('/', auth, [
   body('name').notEmpty().withMessage('Nome é obrigatório'),
   body('description').notEmpty().withMessage('Descrição é obrigatória'),
   body('price').isNumeric().withMessage('Preço deve ser um número'),
+  body('materialCost').optional().isNumeric().withMessage('Custo de material deve ser um número'),
   body('category').isIn(['produto', 'serviço']).withMessage('Categoria inválida'),
   body('duration').optional().isInt({ min: 15 }).withMessage('Duração deve ser pelo menos 15 minutos')
 ], (req, res) => {
@@ -88,7 +89,7 @@ router.post('/', auth, [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, description, price, category, duration, image } = req.body;
+    const { name, description, price, materialCost, category, duration, image } = req.body;
 
     // Validar duração para serviços
     if (category === 'serviço' && !duration) {
@@ -100,6 +101,7 @@ router.post('/', auth, [
       name,
       description,
       price: parseFloat(price),
+      materialCost: parseFloat(materialCost) || 0,
       category,
       duration: category === 'serviço' ? parseInt(duration) : undefined,
       image: image || '',

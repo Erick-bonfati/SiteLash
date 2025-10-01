@@ -2,22 +2,19 @@
 
 ## ⏰ **Horários de Funcionamento**
 
-O sistema agora funciona em **3 períodos específicos por dia**:
+O sistema funciona com **horários específicos por dia da semana**:
 
-### 🌅 **Período 1: Manhã**
-- **Horário**: 8h00 às 10h30
-- **Intervalos**: A cada 30 minutos
-- **Horários disponíveis**: 8:00, 8:30, 9:00, 9:30, 10:00, 10:30
+### 📅 **Segunda a Sexta-feira**
+- **Horários disponíveis**: 9:00, 11:00, 15:00, 18:00
+- **Total**: 4 horários por dia
 
-### ☀️ **Período 2: Tarde**
-- **Horário**: 13h00 às 15h30
-- **Intervalos**: A cada 30 minutos
-- **Horários disponíveis**: 13:00, 13:30, 14:00, 14:30, 15:00, 15:30
+### 🗓️ **Sábado**
+- **Horários disponíveis**: 8:00, 11:00, 14:00
+- **Total**: 3 horários por dia
 
-### 🌆 **Período 3: Noite**
-- **Horário**: 17h00 às 20h00
-- **Intervalos**: A cada 30 minutos
-- **Horários disponíveis**: 17:00, 17:30, 18:00, 18:30, 19:00, 19:30, 20:00
+### 🚫 **Domingo**
+- **Funcionamento**: Fechado
+- **Horários disponíveis**: Nenhum
 
 ## 🚫 **Regras de Bloqueio**
 
@@ -34,23 +31,25 @@ O sistema agora funciona em **3 períodos específicos por dia**:
 
 ## 🔄 **Como Funciona**
 
-1. **Cliente seleciona data** → Sistema mostra apenas os 3 períodos
-2. **Cliente escolhe período** → Sistema mostra horários disponíveis
-3. **Sistema verifica conflitos** → Bloqueia horários ocupados
+1. **Cliente seleciona data** → Sistema verifica o dia da semana
+2. **Sistema define horários** → Baseado no dia (seg-sex: 4 horários, sáb: 3 horários, dom: fechado)
+3. **Sistema verifica conflitos** → Bloqueia horários já ocupados
 4. **Agendamento confirmado** → Horário fica indisponível para outros
 
 ## 📱 **Interface do Usuário**
 
-- **Períodos claramente identificados** na tela de agendamento
+- **Horários específicos** mostrados conforme o dia da semana
+- **Domingos bloqueados** - não aparecem horários disponíveis
 - **Horários indisponíveis** aparecem desabilitados
 - **Mensagens de erro** explicam por que um horário não está disponível
 
 ## ✅ **Benefícios**
 
-- ✅ **Organização**: 3 períodos bem definidos
+- ✅ **Organização**: Horários fixos por dia da semana
 - ✅ **Eficiência**: Evita conflitos de horários
 - ✅ **Clareza**: Usuário sabe exatamente quando pode agendar
 - ✅ **Automação**: Sistema gerencia tudo automaticamente
+- ✅ **Flexibilidade**: Diferentes horários para diferentes dias
 
 ## 🎯 **Exemplo Prático**
 

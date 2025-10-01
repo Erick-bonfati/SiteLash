@@ -32,6 +32,28 @@ router.post('/', [
       return res.status(400).json({ message: 'Serviço não encontrado ou indisponível' });
     }
 
+    // Verificar se o horário está dentro dos horários permitidos para o dia da semana
+    const selectedDate = new Date(appointmentDate + 'T00:00:00');
+    const dayOfWeek = selectedDate.getDay();
+    
+    let allowedTimes = [];
+    if (dayOfWeek === 0) {
+      // Domingo - fechado
+      return res.status(400).json({ message: 'Não é possível agendar aos domingos - estamos fechados' });
+    } else if (dayOfWeek === 6) {
+      // Sábado - 3 horários: 8:00, 11:00, 14:00
+      allowedTimes = ['08:00', '11:00', '14:00'];
+    } else {
+      // Segunda a sexta (1-5) - 4 horários: 9:00, 11:00, 15:00, 18:00
+      allowedTimes = ['09:00', '11:00', '15:00', '18:00'];
+    }
+    
+    if (!allowedTimes.includes(appointmentTime)) {
+      return res.status(400).json({ 
+        message: `Horário inválido. Horários disponíveis: ${allowedTimes.join(', ')}` 
+      });
+    }
+
     // Verificar se já existe agendamento no mesmo horário
     const existingAppointment = await Appointment.findOne({
       appointmentDate: new Date(appointmentDate),
@@ -166,13 +188,21 @@ router.get('/available-times/:date', async (req, res) => {
       return res.status(400).json({ message: 'Serviço não encontrado' });
     }
 
-    // Horários de funcionamento (9h às 18h)
-    const workingHours = [];
-    for (let hour = 9; hour < 18; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        workingHours.push(time);
-      }
+    // Verificar o dia da semana da data selecionada
+    const selectedDate = new Date(date + 'T00:00:00');
+    const dayOfWeek = selectedDate.getDay(); // 0 = domingo, 1 = segunda, ..., 6 = sábado
+    
+    let workingHours = [];
+    
+    if (dayOfWeek === 0) {
+      // Domingo - fechado
+      workingHours = [];
+    } else if (dayOfWeek === 6) {
+      // Sábado - 3 horários: 8:00, 11:00, 14:00
+      workingHours = ['08:00', '11:00', '14:00'];
+    } else {
+      // Segunda a sexta (1-5) - 4 horários: 9:00, 11:00, 15:00, 18:00
+      workingHours = ['09:00', '11:00', '15:00', '18:00'];
     }
 
     // Buscar agendamentos existentes para a data

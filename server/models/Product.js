@@ -18,6 +18,11 @@ const productSchema = new mongoose.Schema({
     required: [true, 'Preço é obrigatório'],
     min: [0, 'Preço não pode ser negativo']
   },
+  materialCost: {
+    type: Number,
+    default: 0,
+    min: [0, 'Custo de material não pode ser negativo']
+  },
   category: {
     type: String,
     required: [true, 'Categoria é obrigatória'],

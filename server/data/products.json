@@ -9,6 +9,19 @@
     "image": "/images/product-1759187744586-133604920.png",
     "isActive": true,
     "createdAt": "2025-09-29T23:15:46.333Z",
-    "updatedAt": "2025-09-29T23:15:46.333Z"
+    "updatedAt": "2025-10-01T23:40:33.703Z"
+  },
+  {
+    "_id": "2",
+    "name": "Volume Russo",
+    "description": "teste",
+    "price": 180,
+    "materialCost": 50,
+    "category": "serviço",
+    "duration": 90,
+    "image": "/images/product-1759362154249-905046582.png",
+    "isActive": true,
+    "createdAt": "2025-10-01T23:42:50.803Z",
+    "updatedAt": "2025-10-01T23:42:50.803Z"
   }
 ]

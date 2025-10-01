@@ -8,6 +8,7 @@ const authRoutes = require('./routes/auth-mock');
 const productRoutes = require('./routes/products-mock');
 const appointmentRoutes = require('./routes/appointments-mock');
 const uploadRoutes = require('./routes/upload');
+const financialRoutes = require('./routes/financial');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,6 +31,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/financial', financialRoutes);
 
 // Rota de teste
 app.get('/api/test', (req, res) => {

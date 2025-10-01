@@ -66,16 +66,25 @@ router.post('/', [
     const timeInMinutes = timeHour * 60 + timeMinute;
     const serviceDurationInMinutes = serviceData.duration;
     
-    // Verificar se está dentro dos períodos: 8h-10h30, 13h-15h30, 17h-20h
-    const isWithinAllowedPeriods = (
-      (timeInMinutes >= 8 * 60 && timeInMinutes + serviceDurationInMinutes <= 10.5 * 60) || // 8h-10h30
-      (timeInMinutes >= 13 * 60 && timeInMinutes + serviceDurationInMinutes <= 15.5 * 60) || // 13h-15h30
-      (timeInMinutes >= 17 * 60 && timeInMinutes + serviceDurationInMinutes <= 20 * 60) // 17h-20h
-    );
+    // Verificar se o horário está dentro dos horários permitidos para o dia da semana
+    const selectedDate = new Date(appointmentDate + 'T00:00:00');
+    const dayOfWeek = selectedDate.getDay();
     
-    if (!isWithinAllowedPeriods) {
+    let allowedTimes = [];
+    if (dayOfWeek === 0) {
+      // Domingo - fechado
+      return res.status(400).json({ message: 'Não é possível agendar aos domingos - estamos fechados' });
+    } else if (dayOfWeek === 6) {
+      // Sábado - 3 horários: 8:00, 11:00, 14:00
+      allowedTimes = ['08:00', '11:00', '14:00'];
+    } else {
+      // Segunda a sexta (1-5) - 4 horários: 9:00, 11:00, 15:00, 18:00
+      allowedTimes = ['09:00', '11:00', '15:00', '18:00'];
+    }
+    
+    if (!allowedTimes.includes(appointmentTime)) {
       return res.status(400).json({ 
-        message: 'Horário fora dos períodos permitidos. Agendamentos disponíveis: 8h-10h30, 13h-15h30, 17h-20h' 
+        message: `Horário inválido. Horários disponíveis: ${allowedTimes.join(', ')}` 
       });
     }
 
@@ -251,33 +260,21 @@ router.get('/available-times/:date', (req, res) => {
       return res.status(400).json({ message: 'Serviço não encontrado' });
     }
 
-    // Horários de funcionamento em 3 períodos específicos
-    const workingHours = [];
+    // Verificar o dia da semana da data selecionada
+    const selectedDate = new Date(date + 'T00:00:00');
+    const dayOfWeek = selectedDate.getDay(); // 0 = domingo, 1 = segunda, ..., 6 = sábado
     
-    // Período 1: 8h às 10h30
-    for (let hour = 8; hour <= 10; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        if (hour === 10 && minute > 30) break; // Parar em 10h30
-        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        workingHours.push(time);
-      }
-    }
+    let workingHours = [];
     
-    // Período 2: 13h às 15h30
-    for (let hour = 13; hour <= 15; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        if (hour === 15 && minute > 30) break; // Parar em 15h30
-        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        workingHours.push(time);
-      }
-    }
-    
-    // Período 3: 17h às 20h
-    for (let hour = 17; hour < 20; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        workingHours.push(time);
-      }
+    if (dayOfWeek === 0) {
+      // Domingo - fechado
+      workingHours = [];
+    } else if (dayOfWeek === 6) {
+      // Sábado - 3 horários: 8:00, 11:00, 14:00
+      workingHours = ['08:00', '11:00', '14:00'];
+    } else {
+      // Segunda a sexta (1-5) - 4 horários: 9:00, 11:00, 15:00, 18:00
+      workingHours = ['09:00', '11:00', '15:00', '18:00'];
     }
 
     // Buscar agendamentos existentes para a data

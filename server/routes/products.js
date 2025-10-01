@@ -56,6 +56,7 @@ router.post('/', auth, [
   body('name').notEmpty().withMessage('Nome é obrigatório'),
   body('description').notEmpty().withMessage('Descrição é obrigatória'),
   body('price').isNumeric().withMessage('Preço deve ser um número'),
+  body('materialCost').optional().isNumeric().withMessage('Custo de material deve ser um número'),
   body('category').isIn(['produto', 'serviço']).withMessage('Categoria inválida'),
   body('duration').optional().isInt({ min: 15 }).withMessage('Duração deve ser pelo menos 15 minutos')
 ], async (req, res) => {
@@ -65,7 +66,7 @@ router.post('/', auth, [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, description, price, category, duration, image } = req.body;
+    const { name, description, price, materialCost, category, duration, image } = req.body;
 
     // Validar duração para serviços
     if (category === 'serviço' && !duration) {
@@ -76,6 +77,7 @@ router.post('/', auth, [
       name,
       description,
       price,
+      materialCost: materialCost || 0,
       category,
       duration: category === 'serviço' ? duration : undefined,
       image: image || ''
@@ -96,6 +98,7 @@ router.put('/:id', auth, [
   body('name').optional().notEmpty().withMessage('Nome não pode estar vazio'),
   body('description').optional().notEmpty().withMessage('Descrição não pode estar vazia'),
   body('price').optional().isNumeric().withMessage('Preço deve ser um número'),
+  body('materialCost').optional().isNumeric().withMessage('Custo de material deve ser um número'),
   body('category').optional().isIn(['produto', 'serviço']).withMessage('Categoria inválida'),
   body('duration').optional().isInt({ min: 15 }).withMessage('Duração deve ser pelo menos 15 minutos')
 ], async (req, res) => {
@@ -111,12 +114,13 @@ router.put('/:id', auth, [
       return res.status(404).json({ message: 'Produto/serviço não encontrado' });
     }
 
-    const { name, description, price, category, duration, image, isActive } = req.body;
+    const { name, description, price, materialCost, category, duration, image, isActive } = req.body;
 
     // Atualizar campos
     if (name !== undefined) product.name = name;
     if (description !== undefined) product.description = description;
     if (price !== undefined) product.price = price;
+    if (materialCost !== undefined) product.materialCost = materialCost;
     if (category !== undefined) product.category = category;
     if (duration !== undefined) product.duration = duration;
     if (image !== undefined) product.image = image;
