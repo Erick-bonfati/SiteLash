@@ -29,9 +29,6 @@ const auth = (req, res, next) => {
   }
 };
 
-// @route   POST /api/upload
-// @desc    Upload de imagem para produto/serviço
-// @access  Private
 router.post('/', auth, upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
@@ -52,9 +49,6 @@ router.post('/', auth, upload.single('image'), (req, res) => {
   }
 });
 
-// @route   DELETE /api/upload/:filename
-// @desc    Deletar imagem
-// @access  Private
 router.delete('/:filename', auth, (req, res) => {
   try {
     const filename = req.params.filename;

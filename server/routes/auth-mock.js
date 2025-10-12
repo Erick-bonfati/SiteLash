@@ -5,9 +5,6 @@ const { body, validationResult } = require('express-validator');
 
 const router = express.Router();
 
-// @route   POST /api/auth/login
-// @desc    Login do admin
-// @access  Public
 router.post('/login', [
   body('email').isEmail().normalizeEmail().withMessage('Email inválido'),
   body('password').isLength({ min: 6 }).withMessage('Senha deve ter pelo menos 6 caracteres')
@@ -58,9 +55,6 @@ router.post('/login', [
   }
 });
 
-// @route   GET /api/auth/me
-// @desc    Obter dados do admin logado
-// @access  Private
 router.get('/me', (req, res) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');

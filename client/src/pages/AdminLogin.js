@@ -29,7 +29,7 @@ const AdminLogin = () => {
       const result = await login(formData.email, formData.password);
       
       if (result.success) {
-        toast.success('Login realizado com sucesso! 🎉');
+        toast.success('Login realizado com sucesso!');
         navigate('/admin');
       } else {
         toast.error(result.message);
@@ -60,7 +60,7 @@ const AdminLogin = () => {
               color: '#4a4a4a',
               marginBottom: '0.5rem'
             }}>
-              🔐 Área Admin
+              Área Administrativa
             </h1>
             <p style={{
               color: '#6b7280',
@@ -134,7 +134,7 @@ const AdminLogin = () => {
                 color: '#4a4a4a',
                 marginBottom: '0.5rem'
               }}>
-                💡 Conta de Teste
+                Conta de Teste
               </h4>
               <p style={{
                 fontSize: '0.8rem',

@@ -28,9 +28,6 @@ const auth = (req, res, next) => {
   }
 };
 
-// @route   GET /api/products
-// @desc    Obter todos os produtos/serviços ativos
-// @access  Public
 router.get('/', (req, res) => {
   try {
     const products = global.mockData.products.filter(p => p.isActive);
@@ -41,9 +38,6 @@ router.get('/', (req, res) => {
   }
 });
 
-// @route   GET /api/products/all
-// @desc    Obter todos os produtos/serviços (admin)
-// @access  Private
 router.get('/all', auth, (req, res) => {
   try {
     const products = [...global.mockData.products];
@@ -54,9 +48,6 @@ router.get('/all', auth, (req, res) => {
   }
 });
 
-// @route   GET /api/products/:id
-// @desc    Obter produto/serviço por ID
-// @access  Public
 router.get('/:id', (req, res) => {
   try {
     const product = global.mockData.products.find(p => p._id === req.params.id);
@@ -72,9 +63,6 @@ router.get('/:id', (req, res) => {
   }
 });
 
-// @route   POST /api/products
-// @desc    Criar novo produto/serviço
-// @access  Private
 router.post('/', auth, [
   body('name').notEmpty().withMessage('Nome é obrigatório'),
   body('description').notEmpty().withMessage('Descrição é obrigatória'),
@@ -122,9 +110,6 @@ router.post('/', auth, [
   }
 });
 
-// @route   PUT /api/products/:id
-// @desc    Atualizar produto/serviço
-// @access  Private
 router.put('/:id', auth, [
   body('name').optional().notEmpty().withMessage('Nome não pode estar vazio'),
   body('description').optional().notEmpty().withMessage('Descrição não pode estar vazia'),
@@ -168,9 +153,6 @@ router.put('/:id', auth, [
   }
 });
 
-// @route   DELETE /api/products/:id
-// @desc    Deletar produto/serviço
-// @access  Private
 router.delete('/:id', auth, (req, res) => {
   try {
     const productIndex = global.mockData.products.findIndex(p => p._id === req.params.id);

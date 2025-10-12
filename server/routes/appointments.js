@@ -6,9 +6,6 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// @route   POST /api/appointments
-// @desc    Criar novo agendamento
-// @access  Public
 router.post('/', [
   body('customerName').notEmpty().withMessage('Nome é obrigatório'),
   body('customerEmail').isEmail().normalizeEmail().withMessage('Email inválido'),
@@ -94,9 +91,6 @@ router.post('/', [
   }
 });
 
-// @route   GET /api/appointments
-// @desc    Obter todos os agendamentos (admin)
-// @access  Private
 router.get('/', auth, async (req, res) => {
   try {
     const { status, date } = req.query;
@@ -121,9 +115,6 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// @route   GET /api/appointments/:id
-// @desc    Obter agendamento por ID
-// @access  Private
 router.get('/:id', auth, async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id)
@@ -140,9 +131,6 @@ router.get('/:id', auth, async (req, res) => {
   }
 });
 
-// @route   PUT /api/appointments/:id/status
-// @desc    Atualizar status do agendamento
-// @access  Private
 router.put('/:id/status', auth, [
   body('status').isIn(['pendente', 'confirmado', 'cancelado', 'concluído']).withMessage('Status inválido')
 ], async (req, res) => {
@@ -170,9 +158,6 @@ router.put('/:id/status', auth, [
   }
 });
 
-// @route   GET /api/appointments/available-times/:date
-// @desc    Obter horários disponíveis para uma data
-// @access  Public
 router.get('/available-times/:date', async (req, res) => {
   try {
     const { date } = req.params;

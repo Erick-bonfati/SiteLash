@@ -5,9 +5,6 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// @route   GET /api/products
-// @desc    Obter todos os produtos/serviços ativos
-// @access  Public
 router.get('/', async (req, res) => {
   try {
     const products = await Product.find({ isActive: true }).sort({ createdAt: -1 });
@@ -18,9 +15,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// @route   GET /api/products/all
-// @desc    Obter todos os produtos/serviços (admin)
-// @access  Private
 router.get('/all', auth, async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
@@ -31,9 +25,6 @@ router.get('/all', auth, async (req, res) => {
   }
 });
 
-// @route   GET /api/products/:id
-// @desc    Obter produto/serviço por ID
-// @access  Public
 router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -49,9 +40,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// @route   POST /api/products
-// @desc    Criar novo produto/serviço
-// @access  Private
 router.post('/', auth, [
   body('name').notEmpty().withMessage('Nome é obrigatório'),
   body('description').notEmpty().withMessage('Descrição é obrigatória'),
@@ -91,9 +79,6 @@ router.post('/', auth, [
   }
 });
 
-// @route   PUT /api/products/:id
-// @desc    Atualizar produto/serviço
-// @access  Private
 router.put('/:id', auth, [
   body('name').optional().notEmpty().withMessage('Nome não pode estar vazio'),
   body('description').optional().notEmpty().withMessage('Descrição não pode estar vazia'),
@@ -134,9 +119,6 @@ router.put('/:id', auth, [
   }
 });
 
-// @route   DELETE /api/products/:id
-// @desc    Deletar produto/serviço
-// @access  Private
 router.delete('/:id', auth, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);

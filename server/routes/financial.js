@@ -1,12 +1,32 @@
 const express = require('express');
 const FinancialCalculator = require('../utils/financialCalculator');
-const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// @route   GET /api/financial/metrics
-// @desc    Obter métricas financeiras gerais
-// @access  Private
+// Mock authentication middleware
+const auth = (req, res, next) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({ message: 'Token de acesso negado' });
+    }
+
+    const jwt = require('jsonwebtoken');
+    const decoded = jwt.verify(token, 'sua_chave_secreta_super_segura_aqui_2023');
+    const admin = global.mockData.admins.find(a => a._id === decoded.id && a.isActive);
+    
+    if (!admin) {
+      return res.status(401).json({ message: 'Token inválido' });
+    }
+
+    req.admin = admin;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: 'Token inválido' });
+  }
+};
+
 router.get('/metrics', auth, (req, res) => {
   try {
     const metrics = FinancialCalculator.getFinancialMetrics();
@@ -17,9 +37,6 @@ router.get('/metrics', auth, (req, res) => {
   }
 });
 
-// @route   GET /api/financial/revenue-by-period
-// @desc    Obter faturamento por período
-// @access  Private
 router.get('/revenue-by-period', auth, (req, res) => {
   try {
     const { startDate, endDate } = req.query;
@@ -38,9 +55,6 @@ router.get('/revenue-by-period', auth, (req, res) => {
   }
 });
 
-// @route   GET /api/financial/monthly-revenue
-// @desc    Obter faturamento mensal dos últimos 12 meses
-// @access  Private
 router.get('/monthly-revenue', auth, (req, res) => {
   try {
     const monthlyData = [];

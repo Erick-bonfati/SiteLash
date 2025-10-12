@@ -6,9 +6,6 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// @route   POST /api/auth/login
-// @desc    Login do admin
-// @access  Public
 router.post('/login', [
   body('email').isEmail().normalizeEmail().withMessage('Email inválido'),
   body('password').isLength({ min: 6 }).withMessage('Senha deve ter pelo menos 6 caracteres')
@@ -59,9 +56,6 @@ router.post('/login', [
   }
 });
 
-// @route   GET /api/auth/me
-// @desc    Obter dados do admin logado
-// @access  Private
 router.get('/me', auth, async (req, res) => {
   try {
     res.json({
@@ -78,9 +72,6 @@ router.get('/me', auth, async (req, res) => {
   }
 });
 
-// @route   POST /api/auth/register
-// @desc    Registrar novo admin (apenas para desenvolvimento)
-// @access  Public (em produção, deve ser protegido)
 router.post('/register', [
   body('username').isLength({ min: 3 }).withMessage('Nome de usuário deve ter pelo menos 3 caracteres'),
   body('email').isEmail().normalizeEmail().withMessage('Email inválido'),

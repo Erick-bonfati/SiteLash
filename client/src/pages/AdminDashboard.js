@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 import ImageUpload from '../components/ImageUpload';
 
 const AdminDashboard = () => {
+  const { admin } = useAuth();
   const [activeTab, setActiveTab] = useState('appointments');
   const [appointments, setAppointments] = useState([]);
   const [products, setProducts] = useState([]);
@@ -23,6 +25,8 @@ const AdminDashboard = () => {
   });
 
   useEffect(() => {
+    if (!admin) return;
+    
     if (activeTab === 'appointments') {
       fetchAppointments();
     } else if (activeTab === 'products') {
@@ -30,7 +34,7 @@ const AdminDashboard = () => {
     } else if (activeTab === 'financial') {
       fetchFinancialMetrics();
     }
-  }, [activeTab]);
+  }, [activeTab, admin]);
 
   const fetchAppointments = async () => {
     setLoading(true);
@@ -179,7 +183,6 @@ const AdminDashboard = () => {
     <div style={{ padding: '2rem 0' }}>
       <div className="container">
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <h1 style={{
               fontSize: '2.5rem',
@@ -187,7 +190,7 @@ const AdminDashboard = () => {
               color: '#4a4a4a',
               marginBottom: '1rem'
             }}>
-              🎛️ Painel Administrativo
+              Painel Administrativo
             </h1>
             <p style={{
               color: '#6b7280',
@@ -197,7 +200,6 @@ const AdminDashboard = () => {
             </p>
           </div>
 
-          {/* Tabs */}
           <div style={{
             display: 'flex',
             gap: '1rem',
@@ -217,7 +219,7 @@ const AdminDashboard = () => {
                 transition: 'all 0.3s ease'
               }}
             >
-              📅 Agendamentos
+              Agendamentos
             </button>
             <button
               onClick={() => setActiveTab('products')}
@@ -232,7 +234,7 @@ const AdminDashboard = () => {
                 transition: 'all 0.3s ease'
               }}
             >
-              🛍️ Produtos/Serviços
+              Produtos/Serviços
             </button>
             <button
               onClick={() => setActiveTab('financial')}
@@ -247,11 +249,10 @@ const AdminDashboard = () => {
                 transition: 'all 0.3s ease'
               }}
             >
-              💰 Financeiro
+              Financeiro
             </button>
           </div>
 
-          {/* Conteúdo das Tabs */}
           {activeTab === 'appointments' && (
             <div>
               <div style={{
@@ -319,15 +320,15 @@ const AdminDashboard = () => {
 
                       <div className="grid grid-3" style={{ marginBottom: '1rem' }}>
                         <div>
-                          <strong style={{ color: '#4a4a4a' }}>📧 Email:</strong>
+                          <strong style={{ color: '#4a4a4a' }}>Email:</strong>
                           <p style={{ color: '#6b7280', margin: 0 }}>{appointment.customerEmail}</p>
                         </div>
                         <div>
-                          <strong style={{ color: '#4a4a4a' }}>📞 Telefone:</strong>
+                          <strong style={{ color: '#4a4a4a' }}>Telefone:</strong>
                           <p style={{ color: '#6b7280', margin: 0 }}>{appointment.customerPhone}</p>
                         </div>
                         <div>
-                          <strong style={{ color: '#4a4a4a' }}>📅 Data/Hora:</strong>
+                          <strong style={{ color: '#4a4a4a' }}>Data/Hora:</strong>
                           <p style={{ color: '#6b7280', margin: 0 }}>
                             {formatDate(appointment.appointmentDate)} às {formatTime(appointment.appointmentTime)}
                           </p>
@@ -336,7 +337,7 @@ const AdminDashboard = () => {
 
                       {appointment.notes && (
                         <div style={{ marginBottom: '1rem' }}>
-                          <strong style={{ color: '#4a4a4a' }}>📝 Observações:</strong>
+                          <strong style={{ color: '#4a4a4a' }}>Observações:</strong>
                           <p style={{ color: '#6b7280', margin: 0 }}>{appointment.notes}</p>
                         </div>
                       )}
@@ -404,11 +405,10 @@ const AdminDashboard = () => {
                   }}
                   className="btn btn-primary"
                 >
-                  ➕ Novo Produto
+                  Novo Produto
                 </button>
               </div>
 
-              {/* Formulário de Produto */}
               {showProductForm && (
                 <div className="card" style={{ marginBottom: '2rem' }}>
                   <h3 style={{
@@ -615,7 +615,7 @@ const AdminDashboard = () => {
                             textAlign: 'center',
                             marginTop: '0.25rem'
                           }}>
-                            ⏱️ {product.duration} min
+                            {product.duration} min
                           </div>
                         )}
                       </div>
@@ -630,7 +630,7 @@ const AdminDashboard = () => {
                           className="btn btn-secondary"
                           style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}
                         >
-                          ✏️ Editar
+                          Editar
                         </button>
                         <button
                           onClick={() => handleDeleteProduct(product._id)}
@@ -642,7 +642,7 @@ const AdminDashboard = () => {
                             borderColor: '#ef4444'
                           }}
                         >
-                          🗑️ Deletar
+                          Deletar
                         </button>
                       </div>
 
@@ -669,7 +669,6 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* Seção Financeira */}
           {activeTab === 'financial' && (
             <div>
               <div style={{
@@ -683,7 +682,7 @@ const AdminDashboard = () => {
                   fontWeight: '600',
                   color: '#4a4a4a'
                 }}>
-                  💰 Métricas Financeiras
+                  Métricas Financeiras
                 </h2>
                 <button
                   onClick={fetchFinancialMetrics}
@@ -700,7 +699,6 @@ const AdminDashboard = () => {
                 </div>
               ) : financialMetrics ? (
                 <div>
-                  {/* Cards de Métricas */}
                   <div className="grid grid-3" style={{ gap: '1.5rem', marginBottom: '2rem' }}>
                     <div className="card" style={{ textAlign: 'center' }}>
                       <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>💰</div>
@@ -742,10 +740,9 @@ const AdminDashboard = () => {
                     </div>
                   </div>
 
-                  {/* Estatísticas de Agendamentos */}
                   <div className="card" style={{ marginBottom: '2rem' }}>
                     <h3 style={{ fontSize: '1.3rem', fontWeight: '600', color: '#4a4a4a', marginBottom: '1.5rem' }}>
-                      📊 Estatísticas de Agendamentos
+                      Estatísticas de Agendamentos
                     </h3>
                     <div className="grid grid-4" style={{ gap: '1rem' }}>
                       <div style={{ textAlign: 'center' }}>
@@ -775,10 +772,9 @@ const AdminDashboard = () => {
                     </div>
                   </div>
 
-                  {/* Margem de Lucro */}
                   <div className="card">
                     <h3 style={{ fontSize: '1.3rem', fontWeight: '600', color: '#4a4a4a', marginBottom: '1rem' }}>
-                      📈 Margem de Lucro
+                      Margem de Lucro
                     </h3>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                       <div style={{ fontSize: '2rem', fontWeight: '700', color: '#10b981' }}>
