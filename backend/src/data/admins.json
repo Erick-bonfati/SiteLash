@@ -1,0 +1,10 @@
+[
+  {
+    "_id": "1",
+    "username": "admin",
+    "email": "admin@sitelash.com",
+    "password": "$2b$10$5gQDLikgJyMVGfWA7AWp5eqspZsp2CVOqb689bLV0GHrcLcmuTgkS",
+    "role": "admin",
+    "isActive": true
+  }
+]

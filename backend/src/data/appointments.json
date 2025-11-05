@@ -1,0 +1,58 @@
+[
+  {
+    "_id": "1",
+    "customerName": "Erick",
+    "customerEmail": "erick@gmail.com",
+    "customerPhone": "41999999999",
+    "service": "1",
+    "appointmentDate": "2025-10-04T00:00:00.000Z",
+    "appointmentTime": "11:00",
+    "notes": "Oi teste",
+    "totalPrice": 175,
+    "status": "concluído",
+    "createdAt": "2025-10-01T23:39:54.132Z",
+    "updatedAt": "2025-10-01T23:43:34.396Z"
+  },
+  {
+    "_id": "2",
+    "customerName": "erca",
+    "customerEmail": "ericka@gmail.com",
+    "customerPhone": "419999999999",
+    "service": "1",
+    "appointmentDate": "2025-10-02T00:00:00.000Z",
+    "appointmentTime": "11:00",
+    "notes": "teste",
+    "totalPrice": 175,
+    "status": "concluído",
+    "createdAt": "2025-10-01T23:41:14.273Z",
+    "updatedAt": "2025-10-01T23:43:35.618Z"
+  },
+  {
+    "_id": "3",
+    "customerName": "Erick",
+    "customerEmail": "erick@gmail.com",
+    "customerPhone": "4199999999",
+    "service": "2",
+    "appointmentDate": "2025-10-03T00:00:00.000Z",
+    "appointmentTime": "09:00",
+    "notes": "teste",
+    "totalPrice": 180,
+    "status": "concluído",
+    "createdAt": "2025-10-01T23:43:12.926Z",
+    "updatedAt": "2025-10-01T23:43:33.240Z"
+  },
+  {
+    "_id": "4",
+    "customerName": "Maria",
+    "customerEmail": "maria@gmail.com",
+    "customerPhone": "4199999999999",
+    "service": "1",
+    "appointmentDate": "2025-11-19T00:00:00.000Z",
+    "appointmentTime": "09:00",
+    "notes": "teste",
+    "totalPrice": 175,
+    "status": "concluído",
+    "createdAt": "2025-11-05T16:32:01.475Z",
+    "updatedAt": "2025-11-05T16:32:16.230Z"
+  }
+]
