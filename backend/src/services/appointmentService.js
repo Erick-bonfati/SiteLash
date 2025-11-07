@@ -8,17 +8,17 @@ const { findProductById } = require('./productService');
 const normalizeDateString = (date) => new Date(date).toISOString().split('T')[0];
 
 const getAllowedTimesForDay = (date) => {
-  const dayOfWeek = date.getDay();
+  const dayOfWeek = date.getDay(); // 0=domingo ... 6=sábado
 
-  if (dayOfWeek === 0) {
-    return [];
+  if (dayOfWeek === 0 || dayOfWeek === 1) {
+    return []; // Domingo e segunda sem atendimento
   }
 
   if (dayOfWeek === 6) {
     return ['08:00', '11:00', '14:00'];
   }
 
-  return ['09:00', '11:00', '15:00', '18:00'];
+  return ['09:00', '13:00', '15:30', '18:00'];
 };
 
 const ensureServiceExists = (serviceId) => {
@@ -31,19 +31,33 @@ const ensureServiceExists = (serviceId) => {
   return service;
 };
 
-const hasConflict = (appointments, dateString, appointmentTime, durationInMinutes) => {
-  const sourceAppointments = appointments.filter((appointment) => {
+const filterActiveAppointmentsByDay = (appointments, dateString) =>
+  appointments.filter((appointment) => {
     const sameDay =
       normalizeDateString(appointment.appointmentDate) === dateString &&
       ['pendente', 'confirmado'].includes(appointment.status);
     return sameDay;
   });
 
+const isSlotAlreadyTaken = (dayAppointments, appointmentTime) =>
+  dayAppointments.some(
+    (appointment) => appointment.appointmentTime === appointmentTime
+  );
+
+const hasConflict = (appointments, dateString, appointmentTime, durationInMinutes) => {
+  const dayAppointments = filterActiveAppointmentsByDay(appointments, dateString);
+
+  // Se já existe alguém exatamente nesse horário, bloqueia imediatamente,
+  // independentemente do serviço ou duração.
+  if (isSlotAlreadyTaken(dayAppointments, appointmentTime)) {
+    return true;
+  }
+
   const [timeHour, timeMinute] = appointmentTime.split(':').map(Number);
   const requestedStart = timeHour * 60 + timeMinute;
   const requestedEnd = requestedStart + durationInMinutes;
 
-  return sourceAppointments.some((appointment) => {
+  return dayAppointments.some((appointment) => {
     const [appointmentHour, appointmentMinute] = appointment.appointmentTime
       .split(':')
       .map(Number);
@@ -85,7 +99,7 @@ const createAppointment = ({
 
   const allowedTimes = getAllowedTimesForDay(scheduleDate);
   if (allowedTimes.length === 0) {
-    const error = new Error('Não é possível agendar aos domingos - estamos fechados');
+    const error = new Error('Não é possível agendar aos domingos ou segundas - estamos fechados');
     error.statusCode = 400;
     throw error;
   }
@@ -107,7 +121,12 @@ const createAppointment = ({
 
   const appointments = getAppointments();
   const dateString = normalizeDateString(scheduleDate);
-  const durationInMinutes = service.duration;
+  const durationInMinutes = Number(service.duration);
+  if (!durationInMinutes) {
+    const error = new Error('Serviço sem duração configurada');
+    error.statusCode = 400;
+    throw error;
+  }
 
   if (hasConflict(appointments, dateString, appointmentTime, durationInMinutes)) {
     const error = new Error('Horário já está ocupado ou conflita com outro agendamento');
@@ -173,6 +192,13 @@ const updateAppointmentStatus = (appointmentId, status) => {
 
 const getAvailableTimes = (date, serviceId) => {
   const service = ensureServiceExists(serviceId);
+  const serviceDuration = Number(service.duration);
+  if (!serviceDuration) {
+    const error = new Error('Serviço sem duração configurada');
+    error.statusCode = 400;
+    throw error;
+  }
+
   const scheduleDate = new Date(`${date}T00:00:00`);
 
   if (Number.isNaN(scheduleDate.getTime())) {
@@ -195,7 +221,7 @@ const getAvailableTimes = (date, serviceId) => {
     if (isPast) {
       return false;
     }
-    return !hasConflict(appointments, dateString, time, service.duration);
+    return !hasConflict(appointments, dateString, time, serviceDuration);
   });
 };
 
