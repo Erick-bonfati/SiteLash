@@ -23,5 +23,18 @@
     "isActive": true,
     "createdAt": "2025-10-01T23:42:50.803Z",
     "updatedAt": "2025-10-01T23:42:50.803Z"
+  },
+  {
+    "_id": "3",
+    "name": "Volume lindo",
+    "description": "o volume mais lindo...",
+    "price": 69,
+    "materialCost": 34,
+    "category": "serviço",
+    "duration": 15,
+    "image": "/images/product-1762552305852-159621898.jpeg",
+    "isActive": true,
+    "createdAt": "2025-11-07T21:51:48.911Z",
+    "updatedAt": "2025-11-07T21:51:48.911Z"
   }
 ]

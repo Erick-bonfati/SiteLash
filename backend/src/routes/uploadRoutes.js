@@ -25,7 +25,7 @@ router.post('/', authMiddleware, upload.single('image'), (req, res, next) => {
 router.delete('/:filename', authMiddleware, (req, res, next) => {
   try {
     const filename = req.params.filename;
-    const filePath = path.join(__dirname, '../../frontend/public/images', filename);
+    const filePath = path.join(__dirname, '../../../public/images', filename);
 
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);

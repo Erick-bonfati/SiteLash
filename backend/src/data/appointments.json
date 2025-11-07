@@ -93,8 +93,36 @@
     "appointmentTime": "18:00",
     "notes": "teste",
     "totalPrice": 175,
-    "status": "pendente",
+    "status": "concluído",
     "createdAt": "2025-11-07T21:36:49.584Z",
-    "updatedAt": "2025-11-07T21:36:49.584Z"
+    "updatedAt": "2025-11-07T21:52:29.578Z"
+  },
+  {
+    "_id": "8",
+    "customerName": "marcos",
+    "customerEmail": "mariazinha@gmail.com",
+    "customerPhone": "414142142421412412",
+    "service": "1",
+    "appointmentDate": "2025-11-19T00:00:00.000Z",
+    "appointmentTime": "11:00",
+    "notes": "421414141",
+    "totalPrice": 175,
+    "status": "concluído",
+    "createdAt": "2025-11-07T21:48:48.348Z",
+    "updatedAt": "2025-11-07T21:49:01.291Z"
+  },
+  {
+    "_id": "9",
+    "customerName": "erera",
+    "customerEmail": "eriK@gmaill.com",
+    "customerPhone": "54134141",
+    "service": "3",
+    "appointmentDate": "2025-11-19T00:00:00.000Z",
+    "appointmentTime": "11:00",
+    "notes": "14141231",
+    "totalPrice": 69,
+    "status": "concluído",
+    "createdAt": "2025-11-07T21:52:12.680Z",
+    "updatedAt": "2025-11-07T21:52:33.226Z"
   }
 ]

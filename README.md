@@ -54,15 +54,22 @@ git clone <url-do-repositorio>
 cd SiteLash
 ```
 
-2. **Instale as dependências**
+2. **Instale as dependências do frontend (raiz)**
 ```bash
-npm run install-all
+npm install
 ```
 
-3. **Configure as variáveis de ambiente (opcional)**
+3. **Instale as dependências do backend**
+```bash
+cd backend
+npm install
+cd ..
+```
+
+4. **Configure as variáveis de ambiente (opcional)**
 - Defina `PORT`, `NODE_ENV` ou `JWT_SECRET` em um arquivo `.env` dentro de `backend/` se quiser sobrescrever os padrões
 
-4. **Execute o projeto**
+5. **Execute o projeto**
 ```bash
 npm run dev
 ```
@@ -86,14 +93,12 @@ Para testar o sistema administrativo, use:
 
 ```
 SiteLash/
-├── frontend/               # Frontend React
-│   ├── public/            # Arquivos públicos
-│   ├── src/
-│   │   ├── components/    # Componentes reutilizáveis
-│   │   ├── pages/         # Páginas da aplicação
-│   │   ├── context/       # Context API para estado global
-│   │   └── App.js         # Componente principal
-│   └── package.json
+├── public/                # Arquivos públicos do React (imagens, index.html, etc.)
+├── src/                   # Código fonte do frontend React
+│   ├── components/        # Componentes reutilizáveis
+│   ├── pages/             # Páginas da aplicação
+│   ├── context/           # Context API para estado global
+│   └── App.js             # Componente principal
 ├── backend/               # Backend Node.js com persistência em JSON
 │   ├── src/
 │   │   ├── config/       # Configurações (porta, JWT, etc.)
@@ -103,7 +108,8 @@ SiteLash/
 │   │   ├── utils/        # Persistência em arquivos JSON
 │   │   └── server.js     # Servidor principal
 │   └── package.json
-└── package.json         # Scripts principais
+├── package.json          # Scripts/dependências do frontend
+└── craco.config.js       # Configuração do build React
 ```
 
 ## 🎨 Design

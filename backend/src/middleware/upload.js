@@ -2,11 +2,11 @@ const fs = require('fs');
 const multer = require('multer');
 const path = require('path');
 
-// Configurar storage para upload de imagens na pasta public do frontend
+// Configurar storage para upload de imagens na pasta public do frontend (agora na raiz)
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     // Salvar na pasta public do frontend
-    const publicPath = path.join(__dirname, '../../frontend/public/images');
+    const publicPath = path.join(__dirname, '../../../public/images');
     if (!fs.existsSync(publicPath)) {
       fs.mkdirSync(publicPath, { recursive: true });
     }

@@ -16,7 +16,7 @@ Este diretório contém os arquivos JSON que armazenam os dados do sistema SiteL
 
 ## 📸 Imagens
 
-As imagens dos produtos são salvas na pasta `frontend/public/images/` e podem ser acessadas diretamente pelo frontend.
+As imagens dos produtos são salvas na pasta `public/images/` (na raiz do projeto) e podem ser acessadas diretamente pelo frontend.
 
 ## ⚠️ Importante
 
