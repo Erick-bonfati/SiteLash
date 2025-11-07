@@ -34,10 +34,8 @@ Um sistema completo de gerenciamento de agendamentos e produtos/serviços para m
 - **CSS3**: Estilização com design rosa suave
 
 ### Backend
-- **Node.js**: Runtime JavaScript
-- **Express.js**: Framework web
-- **MongoDB**: Banco de dados NoSQL
-- **Mongoose**: ODM para MongoDB
+- **Node.js + Express**: API REST em JavaScript
+- **Persistência em JSON**: Dados salvos em arquivos dentro de `backend/src/data`
 - **JWT**: Autenticação segura
 - **Bcrypt**: Criptografia de senhas
 - **Express Validator**: Validação de dados
@@ -46,7 +44,6 @@ Um sistema completo de gerenciamento de agendamentos e produtos/serviços para m
 
 ### Pré-requisitos
 - Node.js (versão 16 ou superior)
-- MongoDB (local ou Atlas)
 - npm ou yarn
 
 ### Instalação
@@ -62,9 +59,8 @@ cd SiteLash
 npm run install-all
 ```
 
-3. **Configure o banco de dados**
-- Instale o MongoDB localmente ou use MongoDB Atlas
-- O banco será criado automaticamente como `sitelash`
+3. **Configure as variáveis de ambiente (opcional)**
+- Defina `PORT`, `NODE_ENV` ou `JWT_SECRET` em um arquivo `.env` dentro de `backend/` se quiser sobrescrever os padrões
 
 4. **Execute o projeto**
 ```bash
@@ -72,7 +68,7 @@ npm run dev
 ```
 
 Isso iniciará:
-- Backend na porta 5000
+- Backend na porta 5000 (com persistência em arquivos JSON)
 - Frontend na porta 3000
 
 ### Acesso
@@ -90,7 +86,7 @@ Para testar o sistema administrativo, use:
 
 ```
 SiteLash/
-├── client/                 # Frontend React
+├── frontend/               # Frontend React
 │   ├── public/            # Arquivos públicos
 │   ├── src/
 │   │   ├── components/    # Componentes reutilizáveis
@@ -98,12 +94,14 @@ SiteLash/
 │   │   ├── context/       # Context API para estado global
 │   │   └── App.js         # Componente principal
 │   └── package.json
-├── server/                # Backend Node.js
-│   ├── config/           # Configurações
-│   ├── middleware/       # Middlewares personalizados
-│   ├── models/          # Modelos do banco de dados
-│   ├── routes/          # Rotas da API
-│   ├── index.js         # Servidor principal
+├── backend/               # Backend Node.js com persistência em JSON
+│   ├── src/
+│   │   ├── config/       # Configurações (porta, JWT, etc.)
+│   │   ├── controllers/  # Lógica dos endpoints
+│   │   ├── routes/       # Rotas da API
+│   │   ├── services/     # Regras de negócio
+│   │   ├── utils/        # Persistência em arquivos JSON
+│   │   └── server.js     # Servidor principal
 │   └── package.json
 └── package.json         # Scripts principais
 ```
@@ -139,20 +137,3 @@ O design foi pensado especialmente para mulheres, com:
 - ✅ Alterar status (pendente, confirmado, cancelado, concluído)
 - ✅ Filtrar por data e status
 - ✅ Ver detalhes completos do cliente
-
-## 🌟 Próximas Funcionalidades
-
-- [ ] Sistema de notificações por email
-- [ ] Calendário visual de agendamentos
-- [ ] Relatórios e estatísticas
-- [ ] Sistema de avaliações
-- [ ] Integração com pagamentos
-- [ ] App mobile
-
-## 🤝 Contribuição
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request

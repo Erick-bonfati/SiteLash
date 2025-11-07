@@ -2,12 +2,12 @@
   "name": "sitelash",
   "version": "1.0.0",
   "description": "Sistema de agendamentos e produtos/serviços para mulheres",
-  "main": "server/index.js",
+  "main": "backend/src/server.js",
   "scripts": {
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "cd server && npm run dev",
-    "client": "cd client && npm start",
-    "install-all": "npm install && cd server && npm install && cd ../client && npm install"
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm start",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install"
   },
   "keywords": ["agendamento", "serviços", "mulheres", "beauty"],
   "author": "SiteLash",
