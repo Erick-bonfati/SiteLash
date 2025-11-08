@@ -5,11 +5,13 @@ const {
   updateAppointmentStatus,
   getAvailableTimes
 } = require('../services/appointmentService');
+const { sendAppointmentConfirmation } = require('../services/emailService');
 
 const create = (req, res, next) => {
   try {
     const appointment = createAppointment(req.body);
     res.status(201).json(appointment);
+    sendAppointmentConfirmation(appointment);
   } catch (error) {
     next(error);
   }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -21,6 +21,42 @@ const Appointment = () => {
     customerPhone: '',
     notes: ''
   });
+  const [isNewClient, setIsNewClient] = useState('no');
+
+  const selectedServiceData = services.find((s) => s._id === selectedService);
+
+  const whatsappNumberRaw = process.env.REACT_APP_WHATSAPP_NUMBER;
+  const whatsappNumber = (whatsappNumberRaw || '').replace(/\D/g, '');
+
+  const whatsappMessage = useMemo(() => {
+    const lines = [
+      'Olá CleoLash! Sou nova cliente e gostaria de garantir minha primeira reserva.'
+    ];
+
+    if (formData.customerName) {
+      lines.push(`Nome: ${formData.customerName}`);
+    }
+
+    if (selectedServiceData) {
+      lines.push(`Serviço: ${selectedServiceData.name}`);
+    }
+
+    if (selectedDate) {
+      const formattedDate = new Date(`${selectedDate}T00:00:00`).toLocaleDateString('pt-BR');
+      lines.push(`Data desejada: ${formattedDate}`);
+    }
+
+    if (selectedTime) {
+      lines.push(`Horário desejado: ${selectedTime}`);
+    }
+
+    lines.push('Poderia me passar a taxa de agendamento e os próximos passos?');
+
+    return encodeURIComponent(lines.join('\n'));
+  }, [formData.customerName, selectedDate, selectedServiceData, selectedTime]);
+
+  const whatsappLink = `https://api.whatsapp.com/send/?phone=${whatsappNumber}&text=${whatsappMessage}`;
+  const isNewClientYes = isNewClient === 'yes';
 
   useEffect(() => {
     fetchServices();
@@ -81,6 +117,11 @@ const Appointment = () => {
       return;
     }
 
+    if (isNewClientYes) {
+      toast.info('Novas clientes finalizam pelo WhatsApp 💬');
+      return;
+    }
+
     setLoading(true);
     try {
       const appointmentData = {
@@ -120,8 +161,6 @@ const Appointment = () => {
       currency: 'BRL'
     }).format(price);
   };
-
-  const selectedServiceData = services.find(s => s._id === selectedService);
 
   return (
     <div style={{ padding: '2rem 0' }}>
@@ -327,6 +366,69 @@ const Appointment = () => {
                     rows="3"
                   />
                 </div>
+
+                <div className="form-group">
+                  <label className="form-label">Você é cliente nova? *</label>
+                  <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                      <input
+                        type="radio"
+                        name="newClient"
+                        value="no"
+                        checked={isNewClient === 'no'}
+                        onChange={() => setIsNewClient('no')}
+                      />
+                      Não, já sou cliente
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                      <input
+                        type="radio"
+                        name="newClient"
+                        value="yes"
+                        checked={isNewClient === 'yes'}
+                        onChange={() => setIsNewClient('yes')}
+                      />
+                      Sim, é minha primeira vez
+                    </label>
+                  </div>
+                  <p style={{ color: '#6b7280', marginTop: '0.5rem', fontSize: '0.9rem' }}>
+                    Novas clientes passam por uma confirmação via WhatsApp antes de finalizar o agendamento.
+                  </p>
+                </div>
+
+                {isNewClientYes && (
+                  <div
+                    style={{
+                      background: '#fdf2f8',
+                      border: '1px solid #fbcfe8',
+                      borderRadius: '12px',
+                      padding: '1.5rem',
+                      marginTop: '1rem'
+                    }}
+                  >
+                    <h4 style={{ margin: 0, color: '#be185d', fontWeight: 600, marginBottom: '0.5rem' }}>
+                      Cliente nova? 💗
+                    </h4>
+                    <p style={{ color: '#6b7280', lineHeight: 1.6, marginBottom: '1rem' }}>
+                      Para novas clientes, cobramos uma taxa simbólica para garantir o horário. Clique no botão
+                      abaixo para falar conosco no WhatsApp e concluir sua reserva.
+                    </p>
+                    <a
+                      href={whatsappLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-primary"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        fontSize: '1rem'
+                      }}
+                    >
+                      Confirmar pelo WhatsApp 💬
+                    </a>
+                  </div>
+                )}
               </div>
 
               {/* Botão de Submit */}
@@ -334,7 +436,7 @@ const Appointment = () => {
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  disabled={loading || !selectedService || !selectedDate || !selectedTime}
+                  disabled={loading || !selectedService || !selectedDate || !selectedTime || isNewClientYes}
                   style={{
                     fontSize: '1.1rem',
                     padding: '1rem 3rem',

@@ -7,6 +7,7 @@ Um sistema completo de gerenciamento de agendamentos e produtos/serviços para m
 ### Frontend
 - **Página Inicial**: Exibe todos os produtos e serviços disponíveis com preços
 - **Sistema de Agendamento**: Interface intuitiva para agendar horários
+- **Filtro para Novas Clientes**: Direciona primeiras visitas para confirmação pelo WhatsApp
 - **Design Responsivo**: Layout moderno e adaptável para todos os dispositivos
 - **Tema Rosa Suave**: Cores pensadas especialmente para mulheres
 
@@ -15,6 +16,7 @@ Um sistema completo de gerenciamento de agendamentos e produtos/serviços para m
 - **Gestão de Produtos/Serviços**: Cadastrar, editar e remover produtos
 - **Controle de Preços**: Definir e gerenciar preços facilmente
 - **Visualização de Agendamentos**: Ver todos os agendamentos realizados
+- **Confirmação Automática**: Envio de email via Nodemailer após cada reserva
 - **API RESTful**: Endpoints organizados e documentados
 
 ### Funcionalidades Extras
@@ -66,8 +68,28 @@ npm install
 cd ..
 ```
 
-4. **Configure as variáveis de ambiente (opcional)**
-- Defina `PORT`, `NODE_ENV` ou `JWT_SECRET` em um arquivo `.env` dentro de `backend/` se quiser sobrescrever os padrões
+4. **Configure as variáveis de ambiente**
+- Crie um arquivo `.env` dentro da pasta `backend/`
+- Parâmetros gerais disponíveis: `PORT`, `NODE_ENV`, `JWT_SECRET`
+- Para habilitar o envio automático de emails, adicione as variáveis abaixo:
+```env
+EMAIL_HOST=smtp.seuprovedor.com
+EMAIL_PORT=465
+EMAIL_SECURE=true
+EMAIL_USER=contato@seudominio.com
+EMAIL_PASS=sua_senha_ou_token
+EMAIL_FROM="CleoLash <contato@seudominio.com>"
+EMAIL_REPLY_TO=contato@seudominio.com
+EMAIL_ENABLED=true
+# Opcional: cópia oculta para acompanhar novas reservas
+EMAIL_COPY_TO=adm@seudominio.com
+```
+> Use um app password/token em provedores como Gmail/Outlook e mantenha o arquivo fora do versionamento. Se quiser pausar os envios sem remover os dados, defina `EMAIL_ENABLED=false`.
+- Para personalizar o redirecionamento de novas clientes via WhatsApp, defina no arquivo `.env` da raiz do React:
+```env
+REACT_APP_WHATSAPP_NUMBER=5511999999999
+```
+Use apenas números com DDI/DDD (ex.: `55` + `11` + `999999999`). Caso não seja definido, é usado o número fictício `(11) 99999-9999`.
 
 5. **Execute o projeto**
 ```bash
