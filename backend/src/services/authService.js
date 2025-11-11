@@ -1,19 +1,20 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { getAdmins } = require('./dataStore');
+const Admin = require('../models/Admin');
 const { jwtSecret } = require('../config/env');
 
 const sanitizeAdmin = (admin) => ({
-  id: admin._id,
+  id: admin._id?.toString(),
   username: admin.username,
   email: admin.email,
   role: admin.role
 });
 
 const authenticate = async (email, password) => {
-  const admin = getAdmins().find(
-    (item) => item.email === email && item.isActive !== false
-  );
+  const admin = await Admin.findOne({
+    email: email?.toLowerCase(),
+    isActive: { $ne: false }
+  }).lean();
 
   if (!admin) {
     const error = new Error('Credenciais inválidas');
@@ -29,7 +30,7 @@ const authenticate = async (email, password) => {
   }
 
   const payload = {
-    id: admin._id,
+    id: admin._id?.toString(),
     username: admin.username,
     role: admin.role
   };

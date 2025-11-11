@@ -1,21 +1,28 @@
 const FinancialCalculator = require('../utils/financialCalculator');
-const { getAppointments, getProducts } = require('./dataStore');
+const Appointment = require('../models/Appointment');
+const Product = require('../models/Product');
 
-const getFinancialMetrics = () => {
-  const appointments = getAppointments();
-  const products = getProducts();
+const loadFinancialData = async () => {
+  const [appointments, products] = await Promise.all([
+    Appointment.find().lean(),
+    Product.find().lean()
+  ]);
+
+  return { appointments, products };
+};
+
+const getFinancialMetrics = async () => {
+  const { appointments, products } = await loadFinancialData();
   return FinancialCalculator.getFinancialMetrics(appointments, products);
 };
 
-const getRevenueByPeriod = (startDate, endDate) => {
-  const appointments = getAppointments();
-  const products = getProducts();
+const getRevenueByPeriod = async (startDate, endDate) => {
+  const { appointments, products } = await loadFinancialData();
   return FinancialCalculator.getRevenueByPeriod(appointments, products, startDate, endDate);
 };
 
-const getMonthlyRevenue = () => {
-  const appointments = getAppointments();
-  const products = getProducts();
+const getMonthlyRevenue = async () => {
+  const { appointments, products } = await loadFinancialData();
   const monthlyData = [];
   const currentDate = new Date();
 

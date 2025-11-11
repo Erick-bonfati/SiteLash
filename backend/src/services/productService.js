@@ -1,77 +1,53 @@
-const {
-  getProducts,
-  setProducts,
-  generateId
-} = require('./dataStore');
+const Product = require('../models/Product');
 
-const cloneProduct = (product) => ({
-  ...product,
-  createdAt: product.createdAt ? new Date(product.createdAt) : undefined,
-  updatedAt: product.updatedAt ? new Date(product.updatedAt) : undefined
-});
-
-const listActiveProducts = () =>
-  getProducts().filter((product) => product.isActive !== false).map(cloneProduct);
-
-const listAllProducts = () => getProducts().map(cloneProduct);
-
-const findProductById = (productId) => {
-  const product = getProducts().find((item) => item._id === productId);
-  return product ? cloneProduct(product) : null;
+const toNumber = (value) => {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? undefined : parsed;
 };
 
-const createProduct = ({
-  name,
-  description,
-  price,
-  materialCost = 0,
-  category,
-  duration,
-  image = '',
-  isActive = true
-}) => {
-  const products = getProducts();
-  const now = new Date();
+const listActiveProducts = async () =>
+  Product.find({ isActive: { $ne: false } }).sort({ createdAt: -1 }).lean();
 
-  const newProduct = {
-    _id: generateId(products),
-    name,
-    description,
-    price: Number(price),
-    materialCost: Number(materialCost) || 0,
-    category,
-    duration: category === 'serviço' ? Number(duration) : undefined,
-    image,
-    isActive,
-    createdAt: now,
-    updatedAt: now
+const listAllProducts = async () => Product.find().sort({ createdAt: -1 }).lean();
+
+const findProductById = async (productId) => Product.findById(productId).lean();
+
+const createProduct = async (data) => {
+  const payload = {
+    name: data.name,
+    description: data.description,
+    price: toNumber(data.price),
+    materialCost: toNumber(data.materialCost) || 0,
+    category: data.category,
+    duration: data.category === 'serviço' ? toNumber(data.duration) : undefined,
+    image: data.image || '',
+    isActive: data.isActive !== undefined ? data.isActive : true
   };
 
-  setProducts([...products, newProduct]);
-  return cloneProduct(newProduct);
+  const product = await Product.create(payload);
+  return product.toObject();
 };
 
-const updateProduct = (productId, updates) => {
-  const products = getProducts();
-  const index = products.findIndex((item) => item._id === productId);
-
-  if (index === -1) {
+const updateProduct = async (productId, updates) => {
+  const product = await Product.findById(productId);
+  if (!product) {
     return null;
   }
 
-  const product = products[index];
-
   if (updates.name !== undefined) product.name = updates.name;
   if (updates.description !== undefined) product.description = updates.description;
-  if (updates.price !== undefined) product.price = Number(updates.price);
+  if (updates.price !== undefined) product.price = toNumber(updates.price);
   if (updates.materialCost !== undefined) {
-    product.materialCost = Number(updates.materialCost) || 0;
+    product.materialCost = toNumber(updates.materialCost) || 0;
   }
   if (updates.category !== undefined) product.category = updates.category;
 
   if (product.category === 'serviço') {
     if (updates.duration !== undefined) {
-      product.duration = Number(updates.duration);
+      product.duration = toNumber(updates.duration);
     }
   } else {
     product.duration = undefined;
@@ -80,23 +56,13 @@ const updateProduct = (productId, updates) => {
   if (updates.image !== undefined) product.image = updates.image;
   if (updates.isActive !== undefined) product.isActive = updates.isActive;
 
-  product.updatedAt = new Date();
-
-  setProducts([...products]);
-  return cloneProduct(product);
+  await product.save();
+  return product.toObject();
 };
 
-const deleteProduct = (productId) => {
-  const products = getProducts();
-  const index = products.findIndex((item) => item._id === productId);
-
-  if (index === -1) {
-    return false;
-  }
-
-  const updatedProducts = products.filter((product) => product._id !== productId);
-  setProducts(updatedProducts);
-  return true;
+const deleteProduct = async (productId) => {
+  const product = await Product.findByIdAndDelete(productId);
+  return Boolean(product);
 };
 
 module.exports = {

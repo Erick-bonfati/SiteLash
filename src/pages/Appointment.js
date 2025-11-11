@@ -22,11 +22,9 @@ const Appointment = () => {
     notes: ''
   });
   const [isNewClient, setIsNewClient] = useState('no');
+  const [publicSettings, setPublicSettings] = useState(null);
 
   const selectedServiceData = services.find((s) => s._id === selectedService);
-
-  const whatsappNumberRaw = process.env.REACT_APP_WHATSAPP_NUMBER;
-  const whatsappNumber = (whatsappNumberRaw || '').replace(/\D/g, '');
 
   const whatsappMessage = useMemo(() => {
     const lines = [
@@ -55,12 +53,17 @@ const Appointment = () => {
     return encodeURIComponent(lines.join('\n'));
   }, [formData.customerName, selectedDate, selectedServiceData, selectedTime]);
 
-  const whatsappLink = `https://api.whatsapp.com/send/?phone=${whatsappNumber}&text=${whatsappMessage}`;
+  const whatsappLinkBase = publicSettings?.whatsapp?.link;
+  const whatsappLink = whatsappLinkBase ? `${whatsappLinkBase}&text=${whatsappMessage}` : '';
+  const whatsappDisplay = publicSettings?.whatsapp?.display || '';
+  const canContactByWhatsapp = Boolean(whatsappLinkBase);
+
   const isNewClientYes = isNewClient === 'yes';
 
   useEffect(() => {
     fetchServices();
-    
+    fetchPublicSettings();
+
     // Se há um serviço selecionado na URL
     const serviceId = searchParams.get('service');
     if (serviceId) {
@@ -82,6 +85,15 @@ const Appointment = () => {
     } catch (error) {
       toast.error('Erro ao carregar serviços');
       console.error('Erro ao buscar serviços:', error);
+    }
+  };
+
+  const fetchPublicSettings = async () => {
+    try {
+      const response = await axios.get('/api/public/settings');
+      setPublicSettings(response.data);
+    } catch (error) {
+      console.error('Erro ao carregar configurações públicas:', error);
     }
   };
 
@@ -413,20 +425,32 @@ const Appointment = () => {
                       Para novas clientes, cobramos uma taxa simbólica para garantir o horário. Clique no botão
                       abaixo para falar conosco no WhatsApp e concluir sua reserva.
                     </p>
-                    <a
-                      href={whatsappLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-primary"
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        fontSize: '1rem'
-                      }}
-                    >
-                      Confirmar pelo WhatsApp 💬
-                    </a>
+                    {canContactByWhatsapp ? (
+                      <a
+                        href={whatsappLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-primary"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          fontSize: '1rem'
+                        }}
+                      >
+                        Confirmar pelo WhatsApp 💬
+                      </a>
+                    ) : (
+                      <p style={{ color: '#9d174d', fontWeight: 500 }}>
+                        Nosso canal oficial de WhatsApp está temporariamente indisponível. Tente novamente em
+                        instantes ou use nossos outros canais.
+                      </p>
+                    )}
+                    {whatsappDisplay && (
+                      <p style={{ color: '#be185d', marginTop: '1rem', fontWeight: 500 }}>
+                        WhatsApp oficial: <span style={{ fontWeight: 700 }}>{whatsappDisplay}</span>
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

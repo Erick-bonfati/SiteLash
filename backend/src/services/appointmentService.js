@@ -1,11 +1,7 @@
-const {
-  getAppointments,
-  setAppointments,
-  generateId
-} = require('./dataStore');
-const { findProductById } = require('./productService');
+const Appointment = require('../models/Appointment');
+const Product = require('../models/Product');
 
-const normalizeDateString = (date) => new Date(date).toISOString().split('T')[0];
+const activeStatuses = ['pendente', 'confirmado'];
 
 const getAllowedTimesForDay = (date) => {
   const dayOfWeek = date.getDay(); // 0=domingo ... 6=sábado
@@ -15,15 +11,28 @@ const getAllowedTimesForDay = (date) => {
   }
 
   if (dayOfWeek === 6) {
-    return ['08:00', '11:00', '14:00'];
+    return ['08:00', '10:30', '13:00', '15:30'];
   }
 
   return ['09:00', '13:00', '15:30', '18:00'];
 };
 
-const ensureServiceExists = (serviceId) => {
-  const service = findProductById(serviceId);
-  if (!service || service.isActive === false || service.category !== 'serviço') {
+const getDayRange = (date) => {
+  const start = new Date(date);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(date);
+  end.setHours(23, 59, 59, 999);
+  return { start, end };
+};
+
+const ensureServiceExists = async (serviceId) => {
+  const service = await Product.findOne({
+    _id: serviceId,
+    isActive: { $ne: false },
+    category: 'serviço'
+  }).lean();
+
+  if (!service) {
     const error = new Error('Serviço não encontrado ou indisponível');
     error.statusCode = 400;
     throw error;
@@ -31,25 +40,23 @@ const ensureServiceExists = (serviceId) => {
   return service;
 };
 
-const filterActiveAppointmentsByDay = (appointments, dateString) =>
-  appointments.filter((appointment) => {
-    const sameDay =
-      normalizeDateString(appointment.appointmentDate) === dateString &&
-      ['pendente', 'confirmado'].includes(appointment.status);
-    return sameDay;
-  });
+const fetchDayAppointments = async (scheduleDate) => {
+  const { start, end } = getDayRange(scheduleDate);
+  return Appointment.find({
+    appointmentDate: { $gte: start, $lte: end },
+    status: { $in: activeStatuses }
+  })
+    .populate('service')
+    .lean();
+};
 
-const isSlotAlreadyTaken = (dayAppointments, appointmentTime) =>
-  dayAppointments.some(
+const hasConflict = async (scheduleDate, appointmentTime, durationInMinutes) => {
+  const appointments = await fetchDayAppointments(scheduleDate);
+
+  const isSlotAlreadyTaken = appointments.some(
     (appointment) => appointment.appointmentTime === appointmentTime
   );
-
-const hasConflict = (appointments, dateString, appointmentTime, durationInMinutes) => {
-  const dayAppointments = filterActiveAppointmentsByDay(appointments, dateString);
-
-  // Se já existe alguém exatamente nesse horário, bloqueia imediatamente,
-  // independentemente do serviço ou duração.
-  if (isSlotAlreadyTaken(dayAppointments, appointmentTime)) {
+  if (isSlotAlreadyTaken) {
     return true;
   }
 
@@ -57,29 +64,27 @@ const hasConflict = (appointments, dateString, appointmentTime, durationInMinute
   const requestedStart = timeHour * 60 + timeMinute;
   const requestedEnd = requestedStart + durationInMinutes;
 
-  return dayAppointments.some((appointment) => {
+  return appointments.some((appointment) => {
     const [appointmentHour, appointmentMinute] = appointment.appointmentTime
       .split(':')
       .map(Number);
     const appointmentStart = appointmentHour * 60 + appointmentMinute;
-
-    const service = findProductById(appointment.service);
-    const appointmentDuration = service?.duration || 30;
+    const appointmentDuration = appointment.service?.duration || 30;
     const appointmentEnd = appointmentStart + appointmentDuration;
 
     return requestedStart < appointmentEnd && requestedEnd > appointmentStart;
   });
 };
 
-const formatAppointment = (appointment) => {
-  const service = findProductById(appointment.service);
-  return {
-    ...appointment,
-    service: service || { name: 'Serviço não encontrado' }
-  };
+const withServiceFallback = (appointment) => {
+  if (!appointment) return null;
+  if (!appointment.service) {
+    return { ...appointment, service: { name: 'Serviço não encontrado' } };
+  }
+  return appointment;
 };
 
-const createAppointment = ({
+const createAppointment = async ({
   customerName,
   customerEmail,
   customerPhone,
@@ -88,7 +93,7 @@ const createAppointment = ({
   appointmentTime,
   notes = ''
 }) => {
-  const service = ensureServiceExists(serviceId);
+  const service = await ensureServiceExists(serviceId);
 
   const scheduleDate = new Date(`${appointmentDate}T00:00:00`);
   if (Number.isNaN(scheduleDate.getTime())) {
@@ -119,8 +124,6 @@ const createAppointment = ({
     throw error;
   }
 
-  const appointments = getAppointments();
-  const dateString = normalizeDateString(scheduleDate);
   const durationInMinutes = Number(service.duration);
   if (!durationInMinutes) {
     const error = new Error('Serviço sem duração configurada');
@@ -128,70 +131,72 @@ const createAppointment = ({
     throw error;
   }
 
-  if (hasConflict(appointments, dateString, appointmentTime, durationInMinutes)) {
+  if (await hasConflict(scheduleDate, appointmentTime, durationInMinutes)) {
     const error = new Error('Horário já está ocupado ou conflita com outro agendamento');
     error.statusCode = 400;
     throw error;
   }
 
-  const now = new Date();
-  const newAppointment = {
-    _id: generateId(appointments),
+  const appointment = await Appointment.create({
     customerName,
     customerEmail,
     customerPhone,
     service: service._id,
-    appointmentDate: new Date(appointmentDate),
+    appointmentDate: scheduleDate,
     appointmentTime,
     notes,
     totalPrice: service.price,
-    status: 'pendente',
-    createdAt: now,
-    updatedAt: now
-  };
+    status: 'pendente'
+  });
 
-  setAppointments([...appointments, newAppointment]);
-  return formatAppointment(newAppointment);
+  await appointment.populate('service');
+  return withServiceFallback(appointment.toObject());
 };
 
-const listAppointments = ({ status, date } = {}) => {
-  let appointments = [...getAppointments()];
+const listAppointments = async ({ status, date } = {}) => {
+  const filters = {};
 
   if (status) {
-    appointments = appointments.filter((appointment) => appointment.status === status);
+    filters.status = status;
   }
 
   if (date) {
-    appointments = appointments.filter(
-      (appointment) => normalizeDateString(appointment.appointmentDate) === date
-    );
+    const scheduleDate = new Date(`${date}T00:00:00`);
+    if (!Number.isNaN(scheduleDate.getTime())) {
+      const { start, end } = getDayRange(scheduleDate);
+      filters.appointmentDate = { $gte: start, $lte: end };
+    }
   }
 
-  return appointments.map(formatAppointment);
+  const appointments = await Appointment.find(filters)
+    .sort({ appointmentDate: 1, appointmentTime: 1 })
+    .populate('service')
+    .lean();
+
+  return appointments.map(withServiceFallback);
 };
 
-const getAppointmentById = (appointmentId) => {
-  const appointment = getAppointments().find((item) => item._id === appointmentId);
-  return appointment ? formatAppointment(appointment) : null;
+const getAppointmentById = async (appointmentId) => {
+  const appointment = await Appointment.findById(appointmentId).populate('service').lean();
+  return withServiceFallback(appointment);
 };
 
-const updateAppointmentStatus = (appointmentId, status) => {
-  const appointments = getAppointments();
-  const index = appointments.findIndex((item) => item._id === appointmentId);
-
-  if (index === -1) {
+const updateAppointmentStatus = async (appointmentId, status) => {
+  const appointment = await Appointment.findById(appointmentId);
+  if (!appointment) {
     return null;
   }
 
-  appointments[index].status = status;
-  appointments[index].updatedAt = new Date();
+  appointment.status = status;
+  appointment.updatedAt = new Date();
 
-  setAppointments([...appointments]);
-  return formatAppointment(appointments[index]);
+  await appointment.save();
+  await appointment.populate('service');
+  return withServiceFallback(appointment.toObject());
 };
 
-const getAvailableTimes = (date, serviceId) => {
-  const service = ensureServiceExists(serviceId);
+const getAvailableTimes = async (date, serviceId) => {
+  const service = await ensureServiceExists(serviceId);
   const serviceDuration = Number(service.duration);
   if (!serviceDuration) {
     const error = new Error('Serviço sem duração configurada');
@@ -200,7 +205,6 @@ const getAvailableTimes = (date, serviceId) => {
   }
 
   const scheduleDate = new Date(`${date}T00:00:00`);
-
   if (Number.isNaN(scheduleDate.getTime())) {
     const error = new Error('Data inválida');
     error.statusCode = 400;
@@ -212,16 +216,28 @@ const getAvailableTimes = (date, serviceId) => {
     return [];
   }
 
-  const appointments = getAppointments();
-  const dateString = normalizeDateString(scheduleDate);
+  const appointments = await fetchDayAppointments(scheduleDate);
 
   return allowedTimes.filter((time) => {
     const scheduleDateTime = new Date(`${date}T${time}`);
-    const isPast = scheduleDateTime < new Date();
-    if (isPast) {
+    if (scheduleDateTime < new Date()) {
       return false;
     }
-    return !hasConflict(appointments, dateString, time, serviceDuration);
+
+    const [timeHour, timeMinute] = time.split(':').map(Number);
+    const requestedStart = timeHour * 60 + timeMinute;
+    const requestedEnd = requestedStart + serviceDuration;
+
+    return !appointments.some((appointment) => {
+      const [appointmentHour, appointmentMinute] = appointment.appointmentTime
+        .split(':')
+        .map(Number);
+      const appointmentStart = appointmentHour * 60 + appointmentMinute;
+      const appointmentDuration = appointment.service?.duration || 30;
+      const appointmentEnd = appointmentStart + appointmentDuration;
+
+      return requestedStart < appointmentEnd && requestedEnd > appointmentStart;
+    });
   });
 };
 

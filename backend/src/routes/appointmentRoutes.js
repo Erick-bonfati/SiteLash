@@ -9,6 +9,7 @@ const {
 } = require('../controllers/appointmentController');
 const authMiddleware = require('../middleware/auth');
 const validateRequest = require('../middleware/validateRequest');
+const { appointmentLimiter } = require('../middleware/rateLimiters');
 
 const router = express.Router();
 
@@ -24,9 +25,9 @@ const baseValidations = [
   body('notes').optional().isLength({ max: 300 }).withMessage('Observações muito longas')
 ];
 
-router.post('/', baseValidations, validateRequest, create);
+router.post('/', appointmentLimiter, baseValidations, validateRequest, create);
 router.get('/', authMiddleware, list);
-router.get('/available-times/:date', availableTimes);
+router.get('/available-times/:date', appointmentLimiter, availableTimes);
 router.get('/:id', authMiddleware, findOne);
 router.put(
   '/:id/status',

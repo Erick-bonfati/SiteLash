@@ -65,20 +65,6 @@ const Footer = () => {
                   Agendar Serviço
                 </a>
               </li>
-              <li style={{ marginBottom: '0.5rem' }}>
-                <a 
-                  href="/admin/login" 
-                  style={{ 
-                    color: '#6b7280', 
-                    textDecoration: 'none',
-                    transition: 'color 0.3s ease'
-                  }}
-                  onMouseOver={(e) => e.target.style.color = '#ec4899'}
-                  onMouseOut={(e) => e.target.style.color = '#6b7280'}
-                >
-                  Área Admin
-                </a>
-              </li>
             </ul>
           </div>
 
@@ -93,10 +79,10 @@ const Footer = () => {
               Contato
             </h4>
             <div style={{ color: '#6b7280', lineHeight: '1.8' }}>
-              <p>📞 (11) 99999-9999</p>
-              <p>📧 contato@sitelash.com</p>
-              <p>📍 Rua da Beleza, 123</p>
-              <p>São Paulo - SP</p>
+              <p>📞 (41) 99703-6228</p>
+              <p>📧 cleolash@gmail.com</p>
+              <p>📍 Rua Francisco Dranka, 1750</p>
+              <p>Araucária - PR</p>
             </div>
           </div>
         </div>
@@ -118,7 +104,7 @@ const Footer = () => {
             🕒 Horário de Funcionamento
           </h4>
           <p style={{ color: '#6b7280', margin: 0 }}>
-            Segunda a Sexta: 9h às 18h | Sábado: 9h às 16h
+            Segunda a Sexta: 9h às 21h | Sábado: 8h às 15h30
           </p>
         </div>
 
@@ -130,8 +116,7 @@ const Footer = () => {
           color: '#6b7280'
         }}>
           <p style={{ margin: 0 }}>
-            © 2023 SiteLash. Todos os direitos reservados. 
-            Feito com 💖 para mulheres incríveis.
+            © 2023 SiteLash. Todos os direitos reservados.
           </p>
         </div>
       </div>

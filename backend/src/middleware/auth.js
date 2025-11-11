@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { jwtSecret } = require('../config/env');
-const { getAdmins } = require('../services/dataStore');
+const Admin = require('../models/Admin');
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
@@ -10,22 +10,23 @@ module.exports = (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, jwtSecret);
-    const admin = getAdmins().find(
-      (item) => item._id === decoded.id && item.isActive !== false
-    );
+    const admin = await Admin.findOne({
+      _id: decoded.id,
+      isActive: { $ne: false }
+    }).lean();
 
     if (!admin) {
       return res.status(401).json({ message: 'Token inválido' });
     }
 
     req.admin = {
-      id: admin._id,
+      id: admin._id?.toString(),
       username: admin.username,
       email: admin.email,
       role: admin.role
     };
 
-    next();
+    return next();
   } catch (error) {
     return res.status(401).json({ message: 'Token inválido' });
   }

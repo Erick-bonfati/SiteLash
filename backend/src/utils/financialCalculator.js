@@ -1,13 +1,37 @@
+const normalizeId = (value) => {
+  if (!value) return null;
+
+  if (typeof value === 'object') {
+    if (value._id && value._id !== value) {
+      return normalizeId(value._id);
+    }
+    if (value.id && value.id !== value) {
+      return normalizeId(value.id);
+    }
+    if (typeof value.toString === 'function') {
+      return value.toString();
+    }
+  }
+
+  return String(value);
+};
+
+const resolveProduct = (products, serviceRef) => {
+  const serviceId = normalizeId(serviceRef);
+  if (!serviceId) return null;
+  return products.find((product) => normalizeId(product._id) === serviceId);
+};
+
 class FinancialCalculator {
   // Calcular faturamento bruto (agendamentos confirmados)
   static calculateGrossRevenue(appointments, products) {
-    const confirmedAppointments = appointments.filter(apt => 
-      apt.status === 'confirmado' || apt.status === 'concluído'
+    const confirmedAppointments = appointments.filter(
+      (apt) => apt.status === 'confirmado' || apt.status === 'concluído'
     );
 
     let totalGross = 0;
-    confirmedAppointments.forEach(appointment => {
-      const product = products.find(p => p._id === appointment.service);
+    confirmedAppointments.forEach((appointment) => {
+      const product = resolveProduct(products, appointment.service);
       if (product) {
         totalGross += appointment.totalPrice || product.price;
       }
@@ -18,19 +42,17 @@ class FinancialCalculator {
 
   // Calcular faturamento líquido (agendamentos concluídos)
   static calculateNetRevenue(appointments, products) {
-    const completedAppointments = appointments.filter(apt => 
-      apt.status === 'concluído'
-    );
+    const completedAppointments = appointments.filter((apt) => apt.status === 'concluído');
 
     let totalNet = 0;
     let totalMaterialCost = 0;
 
-    completedAppointments.forEach(appointment => {
-      const product = products.find(p => p._id === appointment.service);
+    completedAppointments.forEach((appointment) => {
+      const product = resolveProduct(products, appointment.service);
       if (product) {
         const price = appointment.totalPrice || product.price;
         const materialCost = product.materialCost || 0;
-        
+
         totalNet += price - materialCost;
         totalMaterialCost += materialCost;
       }
@@ -45,13 +67,13 @@ class FinancialCalculator {
 
   // Calcular custo total de materiais
   static calculateTotalMaterialCost(appointments, products) {
-    const allAppointments = appointments.filter(apt => 
-      apt.status === 'confirmado' || apt.status === 'concluído'
+    const allAppointments = appointments.filter(
+      (apt) => apt.status === 'confirmado' || apt.status === 'concluído'
     );
 
     let totalMaterialCost = 0;
-    allAppointments.forEach(appointment => {
-      const product = products.find(p => p._id === appointment.service);
+    allAppointments.forEach((appointment) => {
+      const product = resolveProduct(products, appointment.service);
       if (product) {
         totalMaterialCost += product.materialCost || 0;
       }
@@ -72,15 +94,15 @@ class FinancialCalculator {
       materialCost: totalMaterialCost,
       profitMargin: grossRevenue > 0 ? ((netData.netRevenue / grossRevenue) * 100).toFixed(2) : 0,
       totalAppointments: appointments.length,
-      confirmedAppointments: appointments.filter(apt => apt.status === 'confirmado').length,
-      completedAppointments: appointments.filter(apt => apt.status === 'concluído').length,
-      pendingAppointments: appointments.filter(apt => apt.status === 'pendente').length
+      confirmedAppointments: appointments.filter((apt) => apt.status === 'confirmado').length,
+      completedAppointments: appointments.filter((apt) => apt.status === 'concluído').length,
+      pendingAppointments: appointments.filter((apt) => apt.status === 'pendente').length
     };
   }
 
   // Obter faturamento por período
   static getRevenueByPeriod(appointments, products, startDate, endDate) {
-    const filteredAppointments = appointments.filter(apt => {
+    const filteredAppointments = appointments.filter((apt) => {
       const aptDate = new Date(apt.appointmentDate);
       return aptDate >= new Date(startDate) && aptDate <= new Date(endDate);
     });

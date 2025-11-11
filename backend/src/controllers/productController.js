@@ -7,27 +7,27 @@ const {
   deleteProduct
 } = require('../services/productService');
 
-const getPublicProducts = (req, res, next) => {
+const getPublicProducts = async (req, res, next) => {
   try {
-    const products = listActiveProducts();
+    const products = await listActiveProducts();
     res.json(products);
   } catch (error) {
     next(error);
   }
 };
 
-const getAllProducts = (req, res, next) => {
+const getAllProducts = async (req, res, next) => {
   try {
-    const products = listAllProducts();
+    const products = await listAllProducts();
     res.json(products);
   } catch (error) {
     next(error);
   }
 };
 
-const getProduct = (req, res, next) => {
+const getProduct = async (req, res, next) => {
   try {
-    const product = findProductById(req.params.id);
+    const product = await findProductById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: 'Produto/serviço não encontrado' });
     }
@@ -37,18 +37,18 @@ const getProduct = (req, res, next) => {
   }
 };
 
-const createNewProduct = (req, res, next) => {
+const createNewProduct = async (req, res, next) => {
   try {
-    const product = createProduct(req.body);
+    const product = await createProduct(req.body);
     res.status(201).json(product);
   } catch (error) {
     next(error);
   }
 };
 
-const updateExistingProduct = (req, res, next) => {
+const updateExistingProduct = async (req, res, next) => {
   try {
-    const product = updateProduct(req.params.id, req.body);
+    const product = await updateProduct(req.params.id, req.body);
     if (!product) {
       return res.status(404).json({ message: 'Produto/serviço não encontrado' });
     }
@@ -58,9 +58,9 @@ const updateExistingProduct = (req, res, next) => {
   }
 };
 
-const removeProduct = (req, res, next) => {
+const removeProduct = async (req, res, next) => {
   try {
-    const deleted = deleteProduct(req.params.id);
+    const deleted = await deleteProduct(req.params.id);
     if (!deleted) {
       return res.status(404).json({ message: 'Produto/serviço não encontrado' });
     }

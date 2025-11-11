@@ -4,15 +4,16 @@ const {
   getMonthlyRevenue
 } = require('../services/financialService');
 
-const metrics = (req, res, next) => {
+const metrics = async (req, res, next) => {
   try {
-    res.json(getFinancialMetrics());
+    const data = await getFinancialMetrics();
+    res.json(data);
   } catch (error) {
     next(error);
   }
 };
 
-const revenueByPeriod = (req, res, next) => {
+const revenueByPeriod = async (req, res, next) => {
   try {
     const { startDate, endDate } = req.query;
 
@@ -22,15 +23,17 @@ const revenueByPeriod = (req, res, next) => {
       });
     }
 
-    res.json(getRevenueByPeriod(startDate, endDate));
+    const data = await getRevenueByPeriod(startDate, endDate);
+    res.json(data);
   } catch (error) {
     next(error);
   }
 };
 
-const monthlyRevenue = (req, res, next) => {
+const monthlyRevenue = async (req, res, next) => {
   try {
-    res.json(getMonthlyRevenue());
+    const data = await getMonthlyRevenue();
+    res.json(data);
   } catch (error) {
     next(error);
   }

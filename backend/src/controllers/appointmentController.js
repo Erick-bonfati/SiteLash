@@ -7,9 +7,9 @@ const {
 } = require('../services/appointmentService');
 const { sendAppointmentConfirmation } = require('../services/emailService');
 
-const create = (req, res, next) => {
+const create = async (req, res, next) => {
   try {
-    const appointment = createAppointment(req.body);
+    const appointment = await createAppointment(req.body);
     res.status(201).json(appointment);
     sendAppointmentConfirmation(appointment);
   } catch (error) {
@@ -17,18 +17,18 @@ const create = (req, res, next) => {
   }
 };
 
-const list = (req, res, next) => {
+const list = async (req, res, next) => {
   try {
-    const appointments = listAppointments(req.query);
+    const appointments = await listAppointments(req.query);
     res.json(appointments);
   } catch (error) {
     next(error);
   }
 };
 
-const findOne = (req, res, next) => {
+const findOne = async (req, res, next) => {
   try {
-    const appointment = getAppointmentById(req.params.id);
+    const appointment = await getAppointmentById(req.params.id);
     if (!appointment) {
       return res.status(404).json({ message: 'Agendamento não encontrado' });
     }
@@ -38,9 +38,9 @@ const findOne = (req, res, next) => {
   }
 };
 
-const updateStatus = (req, res, next) => {
+const updateStatus = async (req, res, next) => {
   try {
-    const appointment = updateAppointmentStatus(req.params.id, req.body.status);
+    const appointment = await updateAppointmentStatus(req.params.id, req.body.status);
     if (!appointment) {
       return res.status(404).json({ message: 'Agendamento não encontrado' });
     }
@@ -50,14 +50,14 @@ const updateStatus = (req, res, next) => {
   }
 };
 
-const availableTimes = (req, res, next) => {
+const availableTimes = async (req, res, next) => {
   try {
     const { serviceId } = req.query;
     if (!serviceId) {
       return res.status(400).json({ message: 'ID do serviço é obrigatório' });
     }
 
-    const times = getAvailableTimes(req.params.date, serviceId);
+    const times = await getAvailableTimes(req.params.date, serviceId);
     res.json({ availableTimes: times });
   } catch (error) {
     next(error);
