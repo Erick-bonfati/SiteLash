@@ -71,12 +71,10 @@ cd ..
 ```
 
 4. **Configure as variáveis de ambiente**
-- Crie um arquivo `.env` dentro da pasta `backend/`
-- Parâmetros gerais disponíveis: `PORT`, `NODE_ENV`, `JWT_SECRET`
-- Configure `MONGODB_URI` apontando para seu cluster (ex.: `mongodb://127.0.0.1:27017/sitelash`). Caso não defina, o backend tentará esse endereço local automaticamente.
-- Opcional: personalize as credenciais do primeiro administrador com `DEFAULT_ADMIN_USERNAME`, `DEFAULT_ADMIN_EMAIL` e `DEFAULT_ADMIN_PASSWORD`. Se não informar, é criado `admin@sitelash.com` / `admin123` na primeira execução.
-- Para habilitar o envio automático de emails, adicione as variáveis abaixo:
+- Crie um `.env` na raiz (frontend) apenas se quiser expor `REACT_APP_WHATSAPP_NUMBER` para montar links rápidos no site.
+- No backend é obrigatório um arquivo `backend/.env` com as chaves realmente usadas pelo projeto:
 ```env
+MONGODB_URI=mongodb://127.0.0.1:27017/sitelash
 EMAIL_HOST=smtp.seuprovedor.com
 EMAIL_PORT=465
 EMAIL_SECURE=true
@@ -85,34 +83,9 @@ EMAIL_PASS=sua_senha_ou_token
 EMAIL_FROM="CleoLash <contato@seudominio.com>"
 EMAIL_REPLY_TO=contato@seudominio.com
 EMAIL_ENABLED=true
-# Opcional: cópia oculta para acompanhar novas reservas
-EMAIL_COPY_TO=adm@seudominio.com
-```
-- Defina os canais oficiais (WhatsApp e suporte) no backend, impedindo alterações pelo frontend:
-```env
 CONTACT_WHATSAPP_NUMBER=5511999999999
-CONTACT_WHATSAPP_DISPLAY="(11) 99999-9999"
-CONTACT_SUPPORT_EMAIL=contato@seudominio.com
 ```
-- Endureça o CORS e o rate limiting conforme o ambiente:
-```env
-# Lista separada por vírgula (deixe vazio para liberar todas as origens em desenvolvimento)
-ALLOWED_ORIGINS=https://app.sitelash.com,https://admin.sitelash.com
-
-# Rate limiting global
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX=200
-
-# Rate limiting específico
-RATE_LIMIT_AUTH_WINDOW_MS=900000
-RATE_LIMIT_AUTH_MAX=10
-RATE_LIMIT_APPOINTMENT_WINDOW_MS=3600000
-RATE_LIMIT_APPOINTMENT_MAX=30
-
-# Quando estiver atrás de proxy/reverso (Vercel, Render, Nginx, etc.). Valor padrão 'loopback'.
-# Ajuste para false se não quiser confiar em cabeçalhos X-Forwarded-For.
-TRUST_PROXY=1
-```
+- Não há outras variáveis ocultas: todos os ajustes de segurança, rate limit e credenciais padrão já ficam definidos diretamente no código.
 
 5. **Execute o projeto**
 ```bash

@@ -15,12 +15,6 @@ const toBoolean = (value, fallback = false) => {
   return ['true', '1', 'yes', 'on'].includes(String(value).toLowerCase());
 };
 
-const toList = (value) =>
-  String(value || '')
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean);
-
 const sanitizeDigits = (value) => (value ? String(value).replace(/\D/g, '') : '');
 
 const emailConfig = {
@@ -30,8 +24,7 @@ const emailConfig = {
   user: process.env.EMAIL_USER,
   pass: process.env.EMAIL_PASS,
   from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
-  replyTo: process.env.EMAIL_REPLY_TO || process.env.EMAIL_FROM || process.env.EMAIL_USER,
-  copyTo: process.env.EMAIL_COPY_TO
+  replyTo: process.env.EMAIL_REPLY_TO || process.env.EMAIL_FROM || process.env.EMAIL_USER
 };
 
 const hasEmailCredentials =
@@ -46,62 +39,40 @@ const buildWhatsappConfig = () => {
     return null;
   }
 
-  const display = process.env.CONTACT_WHATSAPP_DISPLAY || phone;
   return {
     phone,
-    display,
+    display: phone,
     link: `https://api.whatsapp.com/send/?phone=${phone}`
   };
 };
 
-const parseTrustProxy = (value) => {
-  if (value === undefined) {
-    return 'loopback';
-  }
-  const normalized = String(value).toLowerCase();
-  if (['true', '1', 'yes', 'on'].includes(normalized)) {
-    return true;
-  }
-  if (['false', '0', 'no', 'off'].includes(normalized)) {
-    return false;
-  }
-  const parsedNumber = Number(value);
-  if (!Number.isNaN(parsedNumber)) {
-    return parsedNumber;
-  }
-  return value;
-};
-
 const securityConfig = {
-  allowedOrigins: (() => {
-    const origins = toList(process.env.ALLOWED_ORIGINS);
-    return origins.length ? origins : null; // null => allow all (backwards compatibility)
-  })(),
-  trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
+  allowedOrigins: null,
+  trustProxy: 'loopback',
   rateLimit: {
     global: {
-      windowMs: toNumber(process.env.RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000),
-      max: toNumber(process.env.RATE_LIMIT_MAX, 200)
+      windowMs: 15 * 60 * 1000,
+      max: 200
     },
     auth: {
-      windowMs: toNumber(process.env.RATE_LIMIT_AUTH_WINDOW_MS, 15 * 60 * 1000),
-      max: toNumber(process.env.RATE_LIMIT_AUTH_MAX, 10)
+      windowMs: 15 * 60 * 1000,
+      max: 10
     },
     appointment: {
-      windowMs: toNumber(process.env.RATE_LIMIT_APPOINTMENT_WINDOW_MS, 60 * 60 * 1000),
-      max: toNumber(process.env.RATE_LIMIT_APPOINTMENT_MAX, 30)
+      windowMs: 60 * 60 * 1000,
+      max: 30
     }
   }
 };
 
 module.exports = {
-  port: toNumber(process.env.PORT, 5000),
-  nodeEnv: process.env.NODE_ENV || 'development',
-  jwtSecret: process.env.JWT_SECRET || DEFAULT_JWT_SECRET,
+  port: 5000,
+  nodeEnv: 'development',
+  jwtSecret: DEFAULT_JWT_SECRET,
   security: securityConfig,
   contact: {
     whatsapp: buildWhatsappConfig(),
-    supportEmail: process.env.CONTACT_SUPPORT_EMAIL || emailConfig.replyTo || emailConfig.from
+    supportEmail: emailConfig.replyTo || emailConfig.from || emailConfig.user
   },
   email: {
     ...emailConfig,

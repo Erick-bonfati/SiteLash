@@ -40,9 +40,9 @@ const ensureDefaultAdmin = async () => {
     return;
   }
 
-  const username = process.env.DEFAULT_ADMIN_USERNAME || 'admin';
-  const email = process.env.DEFAULT_ADMIN_EMAIL || 'admin@sitelash.com';
-  const password = process.env.DEFAULT_ADMIN_PASSWORD || 'admin123';
+  const username = 'admin';
+  const email = 'admin@sitelash.com';
+  const password = 'admin123';
   const passwordHash = await bcrypt.hash(password, 10);
 
   await Admin.create({

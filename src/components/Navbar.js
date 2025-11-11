@@ -49,6 +49,17 @@ const Navbar = () => {
               Início
             </Link>
             <Link
+              to="/sobre"
+              style={{
+                textDecoration: 'none',
+                color: isActive('/sobre') ? '#ec4899' : '#4a4a4a',
+                fontWeight: isActive('/sobre') ? '600' : '400',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              Sobre mim
+            </Link>
+            <Link
               to="/agendamento"
               style={{
                 textDecoration: 'none',
@@ -130,6 +141,18 @@ const Navbar = () => {
               }}
             >
               Início
+            </Link>
+            <Link
+              to="/sobre"
+              onClick={() => setIsMenuOpen(false)}
+              style={{
+                textDecoration: 'none',
+                color: isActive('/sobre') ? '#ec4899' : '#4a4a4a',
+                fontWeight: isActive('/sobre') ? '600' : '400',
+                padding: '0.5rem 0'
+              }}
+            >
+              Sobre mim
             </Link>
             <Link
               to="/agendamento"

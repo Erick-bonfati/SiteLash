@@ -8,6 +8,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Appointment from './pages/Appointment';
+import SobreMim from './pages/SobreMim';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -25,6 +26,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/agendamento" element={<Appointment />} />
+              <Route path="/sobre" element={<SobreMim />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route 
                 path="/admin" 
